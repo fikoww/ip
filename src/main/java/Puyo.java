@@ -24,6 +24,51 @@ public class Puyo {
         }
     }
 
+    public static class Deadline extends Task {
+
+        String by;
+
+        public Deadline(String description, String by) {
+            super(description);
+            this.by = by;
+        }
+
+        @Override
+        public String toString() {
+            return "[D]" + super.toString() + " (by: " + by + ")";
+        }
+    }
+
+    public static class ToDo extends Task {
+
+        public ToDo(String description) {
+            super(description);
+        }
+
+        @Override
+        public String toString() {
+            return "[T]" + super.toString();
+        }
+    }
+
+    public static class Event extends Task {
+
+        String start;
+        String end;
+
+        public Event(String description, String start, String end) {
+            super(description);
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        public String toString() {
+            return "[E]" + super.toString() + " (from: " + start + " to: " + end + ")";
+        }
+    }
+
+
     public static void main(String[] args) {
         String line = "─".repeat(70);
         String solidline = "━".repeat(70);
@@ -80,7 +125,7 @@ public class Puyo {
                     else {
                         tasks[index].done = true;
                         System.out.println(" Amazing! Don't forget to take a rest!");
-                        System.out.println("   [✓] " + tasks[index].name);
+                        System.out.println(tasks[index]);
                     }
                 }
                 else {
@@ -113,10 +158,26 @@ public class Puyo {
                     System.out.println(line);
                 }
                 else {
-                    tasks[taskCount] =  new Task(input);
-                    System.out.println(" Added: " + input);
+                    if (input.startsWith("todo ")) {
+                        tasks[taskCount] = new ToDo(input.substring(5));
+                    }
+                    else if (input.startsWith("deadline")) {
+                        String[] parts = input.substring(9).split("/by");
+                        String name = parts[0].trim();
+                        String by = parts[1].trim();
+                        tasks[taskCount] = new Deadline(name, by);
+                    }
+                    else if (input.startsWith("event")) {
+                        String[] parts = input.substring(6).split("/from|/to");
+                        String name = parts[0].trim();
+                        String from = parts[1].trim();
+                        String to = parts[2].trim();
+                        tasks[taskCount] = new Event(name, from, to);
+                    }
+                    System.out.println(" Don't forget to do this!");
+                    System.out.println(" " + tasks[taskCount]);
                     taskCount++;
-                    System.out.println(" (tasks: " + taskCount + ")");
+                    System.out.println(" (You now have " + taskCount + " tasks to do! Good luck!");
                     System.out.println(line);
                 }
             }
