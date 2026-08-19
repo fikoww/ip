@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Puyo {
     static class Task {
@@ -67,15 +68,15 @@ public class Puyo {
     public static void main(String[] args) {
         String line = "─".repeat(70);
         String solidline = "━".repeat(70);
-        Task[] tasks = new Task[100];
-        int taskCount = 0;
+
+        ArrayList<Task> tasks = new ArrayList<>();
 
         String banner = "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
-                "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
-                "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
-                "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +
-                "██║     ╚██████╔╝   ██║   ╚██████╔╝\n" +
-                "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
+                        "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
+                        "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
+                        "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +
+                        "██║     ╚██████╔╝   ██║   ╚██████╔╝\n" +
+                        "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
 
         System.out.println(solidline);
         System.out.println(banner);
@@ -102,11 +103,11 @@ public class Puyo {
 
             else if (input.equalsIgnoreCase("list")) {
                 System.out.println("(Note: X means you haven't done the task yet, ✓ means you have done the task)");
-                if (taskCount == 0) {
+                if (tasks.isEmpty()) {
                     System.out.println(" (no tasks yet)");
                 } else {
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println(" " + (i + 1) + ". " + tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println(" " + (i + 1) + ". " + tasks.get(i));
                     }
                 }
                 System.out.println(line);
@@ -115,13 +116,14 @@ public class Puyo {
             else if (input.toLowerCase().startsWith("mark")) {
                 try {
                     int index = Integer.parseInt(input.substring(4).trim()) - 1;
-                    if (index >= 0 && index < taskCount) {
-                        if (tasks[index].done) {
+                    if (index >= 0 && index < tasks.size()) {
+                        Task task = tasks.get(index);
+                        if (task.done) {
                             System.out.println(" You indeed have done this task!");
                         } else {
-                            tasks[index].markDone();
+                            task.markDone();
                             System.out.println(" Amazing! Don't forget to take a rest!");
-                            System.out.println(" " + tasks[index]);
+                            System.out.println(" " + task);
                         }
                     } else {
                         System.out.println(" Invalid task number.");
@@ -135,13 +137,14 @@ public class Puyo {
             else if (input.toLowerCase().startsWith("unmark")) {
                 try {
                     int index = Integer.parseInt(input.substring(6).trim()) - 1;
-                    if (index >= 0 && index < taskCount) {
-                        if (!tasks[index].done) {
+                    if (index >= 0 && index < tasks.size()) {
+                        Task task = tasks.get(index);
+                        if (!task.done) {
                             System.out.println(" You indeed haven't done this task!");
                         } else {
-                            tasks[index].unmark();
-                            System.out.println(" Don't forget to " + tasks[index].name + "!");
-                            System.out.println(" " + tasks[index]);
+                            task.unmark();
+                            System.out.println(" Don't forget to " + task.name + "!");
+                            System.out.println(" " + task);
                         }
                     } else {
                         System.out.println(" Invalid task number.");
@@ -152,13 +155,25 @@ public class Puyo {
                 System.out.println(line);
             }
 
-            else {
-                if (taskCount == 100) {
-                    System.out.println("Too many tasks! Please complete one task first!");
-                    System.out.println(line);
-                    continue;
+            else if (input.toLowerCase().startsWith("delete")) {
+                try {
+                    int index = Integer.parseInt(input.substring(6).trim()) - 1;
+                    if (index >= 0 && index < tasks.size()) {
+                        Task removedTask = tasks.remove(index);
+                        System.out.println(" Noted. I have removed the task:");
+                        System.out.println("   " + removedTask);
+                        System.out.println(" Now you have " + tasks.size() + " remaining tasks in the list.");
+                    }
+                    else {
+                        System.out.println(" Invalid task number.");
+                    }
+                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                    System.out.println(" Please provide a valid task number to delete! (e.g. delete 1)");
                 }
+                System.out.println(line);
+            }
 
+            else {
                 if (input.isBlank()) {
                     System.out.println("Please enter a non-empty valid command!");
                     System.out.println(line);
@@ -166,8 +181,9 @@ public class Puyo {
                 }
 
                 String lowerInput = input.toLowerCase();
+                Task newTask = null;
 
-                // 1. TODO COMMAND
+                // 1. TODO
                 if (lowerInput.startsWith("todo")) {
                     String desc = input.substring(4).trim();
                     if (desc.isEmpty()) {
@@ -175,10 +191,10 @@ public class Puyo {
                         System.out.println(line);
                         continue;
                     }
-                    tasks[taskCount] = new ToDo(desc);
+                    newTask = new ToDo(desc);
                 }
 
-                // 2. DEADLINE COMMAND
+                // 2. DEADLINE
                 else if (lowerInput.startsWith("deadline")) {
                     if (!lowerInput.contains("/by")) {
                         System.out.println("Please enter a valid deadline by using '/by'!");
@@ -194,10 +210,10 @@ public class Puyo {
                         System.out.println(line);
                         continue;
                     }
-                    tasks[taskCount] = new Deadline(name, by);
+                    newTask = new Deadline(name, by);
                 }
 
-                // 3. EVENT COMMAND
+                // 3. EVENT
                 else if (lowerInput.startsWith("event")) {
                     boolean hasFrom = lowerInput.contains("/from");
                     boolean hasTo = lowerInput.contains("/to");
@@ -236,7 +252,7 @@ public class Puyo {
                         System.out.println(line);
                         continue;
                     }
-                    tasks[taskCount] = new Event(name, from, to);
+                    newTask = new Event(name, from, to);
                 }
 
                 // 4. UNKNOWN COMMAND
@@ -246,10 +262,10 @@ public class Puyo {
                     continue;
                 }
 
+                tasks.add(newTask);
                 System.out.println(" Don't forget to do this!");
-                System.out.println(" " + tasks[taskCount]);
-                taskCount++;
-                System.out.println(" (You now have " + taskCount + " tasks to do! Good luck!)");
+                System.out.println(" " + newTask);
+                System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
                 System.out.println(line);
             }
         }
