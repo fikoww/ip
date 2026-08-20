@@ -2,13 +2,36 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Puyo {
-    static class Task {
+
+    public enum CommandType {
+        BYE, LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, UNKNOWN
+    }
+
+    public enum TaskType {
+        TODO("[T]"),
+        DEADLINE("[D]"),
+        EVENT("[E]");
+
+        private final String code;
+
+        TaskType(String code) {
+            this.code = code;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
+
+    static abstract class Task {
         String name;
         boolean done;
+        TaskType type;
 
-        Task(String name) {
+        Task(String name, TaskType type) {
             this.name = name.trim();
             this.done = false;
+            this.type = type;
         }
 
         void markDone() {
@@ -19,8 +42,15 @@ public class Puyo {
             this.done = false;
         }
 
+        @Override
         public String toString() {
-            return (done ? "[✓]" : "[X]") + " " + name;
+            return type.getCode() + (done ? "[✓]" : "[X]") + " " + name;
+        }
+    }
+
+    public static class ToDo extends Task {
+        public ToDo(String description) {
+            super(description, TaskType.TODO);
         }
     }
 
@@ -28,24 +58,13 @@ public class Puyo {
         String by;
 
         public Deadline(String description, String by) {
-            super(description);
+            super(description, TaskType.DEADLINE);
             this.by = by;
         }
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + " (by: " + by + ")";
-        }
-    }
-
-    public static class ToDo extends Task {
-        public ToDo(String description) {
-            super(description);
-        }
-
-        @Override
-        public String toString() {
-            return "[T]" + super.toString();
+            return super.toString() + " (by: " + by + ")";
         }
     }
 
@@ -54,14 +73,29 @@ public class Puyo {
         String end;
 
         public Event(String description, String start, String end) {
-            super(description);
+            super(description, TaskType.EVENT);
             this.start = start;
             this.end = end;
         }
 
         @Override
         public String toString() {
-            return "[E]" + super.toString() + " (from: " + start + " to: " + end + ")";
+            return super.toString() + " (from: " + start + " to: " + end + ")";
+        }
+    }
+
+    public static CommandType parseCommand(String input) {
+        String firstWord = input.split(" ")[0].toLowerCase();
+        switch (firstWord) {
+            case "bye": return CommandType.BYE;
+            case "list": return CommandType.LIST;
+            case "mark": return CommandType.MARK;
+            case "unmark": return CommandType.UNMARK;
+            case "delete": return CommandType.DELETE;
+            case "todo": return CommandType.TODO;
+            case "deadline": return CommandType.DEADLINE;
+            case "event": return CommandType.EVENT;
+            default: return CommandType.UNKNOWN;
         }
     }
 
@@ -95,179 +129,168 @@ public class Puyo {
             String input = scanner.nextLine().trim();
             System.out.println(line);
 
-            if (input.equalsIgnoreCase("bye")) {
+            if (input.isBlank()) {
+                System.out.println("Please enter a non-empty valid command!");
+                System.out.println(line);
+                continue;
+            }
+
+            CommandType command = parseCommand(input);
+
+            if (command == CommandType.BYE) {
                 System.out.println("Okay. See you again! Bye!");
                 System.out.println(line);
                 break;
             }
 
-            else if (input.equalsIgnoreCase("list")) {
-                System.out.println("(Note: X means you haven't done the task yet, ✓ means you have done the task)");
-                if (tasks.isEmpty()) {
-                    System.out.println(" (no tasks yet)");
-                } else {
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println(" " + (i + 1) + ". " + tasks.get(i));
-                    }
-                }
-                System.out.println(line);
-            }
-
-            else if (input.toLowerCase().startsWith("mark")) {
-                try {
-                    int index = Integer.parseInt(input.substring(4).trim()) - 1;
-                    if (index >= 0 && index < tasks.size()) {
-                        Task task = tasks.get(index);
-                        if (task.done) {
-                            System.out.println(" You indeed have done this task!");
-                        } else {
-                            task.markDone();
-                            System.out.println(" Amazing! Don't forget to take a rest!");
-                            System.out.println(" " + task);
-                        }
+            switch (command) {
+                case LIST:
+                    System.out.println("(Note: X means you haven't done the task yet, ✓ means you have done the task)");
+                    if (tasks.isEmpty()) {
+                        System.out.println(" (no tasks yet)");
                     } else {
-                        System.out.println(" Invalid task number.");
-                    }
-                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-                    System.out.println(" Please provide a valid task number to mark! (e.g. mark 1)");
-                }
-                System.out.println(line);
-            }
-
-            else if (input.toLowerCase().startsWith("unmark")) {
-                try {
-                    int index = Integer.parseInt(input.substring(6).trim()) - 1;
-                    if (index >= 0 && index < tasks.size()) {
-                        Task task = tasks.get(index);
-                        if (!task.done) {
-                            System.out.println(" You indeed haven't done this task!");
-                        } else {
-                            task.unmark();
-                            System.out.println(" Don't forget to " + task.name + "!");
-                            System.out.println(" " + task);
+                        for (int i = 0; i < tasks.size(); i++) {
+                            System.out.println(" " + (i + 1) + ". " + tasks.get(i));
                         }
-                    } else {
-                        System.out.println(" Invalid task number.");
                     }
-                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-                    System.out.println(" Please provide a valid task number to unmark! (e.g. unmark 1)");
-                }
-                System.out.println(line);
-            }
+                    break;
 
-            else if (input.toLowerCase().startsWith("delete")) {
-                try {
-                    int index = Integer.parseInt(input.substring(6).trim()) - 1;
-                    if (index >= 0 && index < tasks.size()) {
-                        Task removedTask = tasks.remove(index);
-                        System.out.println(" Noted. I have removed the task:");
-                        System.out.println("   " + removedTask);
-                        System.out.println(" Now you have " + tasks.size() + " remaining tasks in the list.");
+                case MARK:
+                    try {
+                        int index = Integer.parseInt(input.substring(4).trim()) - 1;
+                        if (index >= 0 && index < tasks.size()) {
+                            Task task = tasks.get(index);
+                            if (task.done) {
+                                System.out.println(" You indeed have done this task!");
+                            } else {
+                                task.markDone();
+                                System.out.println(" Amazing! Don't forget to take a rest!");
+                                System.out.println(" " + task);
+                            }
+                        } else {
+                            System.out.println(" Invalid task number.");
+                        }
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                        System.out.println(" Please provide a valid task number to mark! (e.g. mark 1)");
                     }
-                    else {
-                        System.out.println(" Invalid task number.");
+                    break;
+
+                case UNMARK:
+                    try {
+                        int index = Integer.parseInt(input.substring(6).trim()) - 1;
+                        if (index >= 0 && index < tasks.size()) {
+                            Task task = tasks.get(index);
+                            if (!task.done) {
+                                System.out.println(" You indeed haven't done this task!");
+                            } else {
+                                task.unmark();
+                                System.out.println(" Don't forget to " + task.name + "!");
+                                System.out.println(" " + task);
+                            }
+                        } else {
+                            System.out.println(" Invalid task number.");
+                        }
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                        System.out.println(" Please provide a valid task number to unmark! (e.g. unmark 1)");
                     }
-                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-                    System.out.println(" Please provide a valid task number to delete! (e.g. delete 1)");
-                }
-                System.out.println(line);
-            }
+                    break;
 
-            else {
-                if (input.isBlank()) {
-                    System.out.println("Please enter a non-empty valid command!");
-                    System.out.println(line);
-                    continue;
-                }
+                case DELETE:
+                    try {
+                        int index = Integer.parseInt(input.substring(6).trim()) - 1;
+                        if (index >= 0 && index < tasks.size()) {
+                            Task removedTask = tasks.remove(index);
+                            System.out.println(" Noted. I've removed this task:");
+                            System.out.println("   " + removedTask);
+                            System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+                        } else {
+                            System.out.println(" Invalid task number.");
+                        }
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                        System.out.println(" Please provide a valid task number to delete! (e.g. delete 1)");
+                    }
+                    break;
 
-                String lowerInput = input.toLowerCase();
-                Task newTask = null;
-
-                // 1. TODO
-                if (lowerInput.startsWith("todo")) {
-                    String desc = input.substring(4).trim();
-                    if (desc.isEmpty()) {
+                case TODO:
+                    String todoDesc = input.substring(4).trim();
+                    if (todoDesc.isEmpty()) {
                         System.out.println("The description of a todo can't be empty!");
-                        System.out.println(line);
-                        continue;
+                    } else {
+                        Task newTask = new ToDo(todoDesc);
+                        tasks.add(newTask);
+                        System.out.println(" Don't forget to do this!");
+                        System.out.println(" " + newTask);
+                        System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
                     }
-                    newTask = new ToDo(desc);
-                }
+                    break;
 
-                // 2. DEADLINE
-                else if (lowerInput.startsWith("deadline")) {
-                    if (!lowerInput.contains("/by")) {
+                case DEADLINE:
+                    String lowerInputDeadline = input.toLowerCase();
+                    if (!lowerInputDeadline.contains("/by")) {
                         System.out.println("Please enter a valid deadline by using '/by'!");
-                        System.out.println(line);
-                        continue;
+                        break;
                     }
-                    String[] parts = input.substring(8).split("/by", 2);
-                    String name = parts[0].trim();
-                    String by = (parts.length > 1) ? parts[1].trim() : "";
+                    String[] deadlineParts = input.substring(8).split("/by", 2);
+                    String deadlineName = deadlineParts[0].trim();
+                    String by = (deadlineParts.length > 1) ? deadlineParts[1].trim() : "";
 
-                    if (name.isEmpty() || by.isEmpty()) {
+                    if (deadlineName.isEmpty() || by.isEmpty()) {
                         System.out.println("The description or time of a deadline can't be empty!");
-                        System.out.println(line);
-                        continue;
+                    } else {
+                        Task newTask = new Deadline(deadlineName, by);
+                        tasks.add(newTask);
+                        System.out.println(" Don't forget to do this!");
+                        System.out.println(" " + newTask);
+                        System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
                     }
-                    newTask = new Deadline(name, by);
-                }
+                    break;
 
-                // 3. EVENT
-                else if (lowerInput.startsWith("event")) {
-                    boolean hasFrom = lowerInput.contains("/from");
-                    boolean hasTo = lowerInput.contains("/to");
+                case EVENT:
+                    String lowerInputEvent = input.toLowerCase();
+                    boolean hasFrom = lowerInputEvent.contains("/from");
+                    boolean hasTo = lowerInputEvent.contains("/to");
 
                     if (!hasFrom && !hasTo) {
                         System.out.println("Please enter a valid event timing by using '/from' and '/to'!");
-                        System.out.println(line);
-                        continue;
+                        break;
                     } else if (!hasFrom) {
                         System.out.println("Please enter a valid starting event timing by using '/from'!");
-                        System.out.println(line);
-                        continue;
+                        break;
                     } else if (!hasTo) {
                         System.out.println("Please enter a valid ending event timing by using '/to'!");
-                        System.out.println(line);
-                        continue;
-                    } else if (lowerInput.indexOf("/from") > lowerInput.indexOf("/to")) {
+                        break;
+                    } else if (lowerInputEvent.indexOf("/from") > lowerInputEvent.indexOf("/to")) {
                         System.out.println("Please enter a valid event timing by putting '/from' before '/to'!");
-                        System.out.println(line);
-                        continue;
+                        break;
                     }
 
-                    String[] parts = input.substring(5).split("/from|/to");
-                    if (parts.length < 3) {
+                    String[] eventParts = input.substring(5).split("/from|/to");
+                    if (eventParts.length < 3) {
                         System.out.println("Event description, '/from', or '/to' cannot be empty!");
-                        System.out.println(line);
-                        continue;
+                        break;
                     }
 
-                    String name = parts[0].trim();
-                    String from = parts[1].trim();
-                    String to = parts[2].trim();
+                    String eventName = eventParts[0].trim();
+                    String from = eventParts[1].trim();
+                    String to = eventParts[2].trim();
 
-                    if (name.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                    if (eventName.isEmpty() || from.isEmpty() || to.isEmpty()) {
                         System.out.println("Event description, '/from', or '/to' cannot be empty!");
-                        System.out.println(line);
-                        continue;
+                    } else {
+                        Task newTask = new Event(eventName, from, to);
+                        tasks.add(newTask);
+                        System.out.println(" Don't forget to do this!");
+                        System.out.println(" " + newTask);
+                        System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
                     }
-                    newTask = new Event(name, from, to);
-                }
+                    break;
 
-                // 4. UNKNOWN COMMAND
-                else {
+                case UNKNOWN:
+                default:
                     System.out.println("Sorry! I don't understand that command!");
-                    System.out.println(line);
-                    continue;
-                }
-
-                tasks.add(newTask);
-                System.out.println(" Don't forget to do this!");
-                System.out.println(" " + newTask);
-                System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
-                System.out.println(line);
+                    break;
             }
+            System.out.println(line);
         }
 
         scanner.close();
