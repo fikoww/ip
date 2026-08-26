@@ -1,5 +1,8 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
 
 public class Puyo {
 
@@ -8,9 +11,9 @@ public class Puyo {
     }
 
     public enum TaskType {
-        TODO("[T]"),
-        DEADLINE("[D]"),
-        EVENT("[E]");
+        TODO("T"),
+        DEADLINE("D"),
+        EVENT("E");
 
         private final String code;
 
@@ -42,9 +45,13 @@ public class Puyo {
             this.done = false;
         }
 
+        public String toFileString() {
+            return type.getCode() + " | " + (done ? "1" : "0") + " | " + name;
+        }
+
         @Override
         public String toString() {
-            return type.getCode() + (done ? "[✓]" : "[X]") + " " + name;
+            return "[" + type.getCode() + "]" + (done ? "[✓]" : "[X]") + " " + name;
         }
     }
 
@@ -63,6 +70,11 @@ public class Puyo {
         }
 
         @Override
+        public String toFileString() {
+            return super.toFileString() + " | " + by;
+        }
+
+        @Override
         public String toString() {
             return super.toString() + " (by: " + by + ")";
         }
@@ -76,6 +88,11 @@ public class Puyo {
             super(description, TaskType.EVENT);
             this.start = start;
             this.end = end;
+        }
+
+        @Override
+        public String toFileString() {
+            return super.toFileString() + " | " + start + " | " + end;
         }
 
         @Override
@@ -99,11 +116,93 @@ public class Puyo {
         }
     }
 
+    static final String FILE_PATH = "data" + File.separator + "puyo.txt";
+
+    public static void saveTasks(ArrayList<Task> tasks) {
+        try {
+            File file = new File(FILE_PATH);
+            file.getParentFile().mkdirs();
+            FileWriter fw = new FileWriter(file);
+            for (Task task : tasks) {
+                fw.write(task.toFileString() + "\n");
+            }
+            fw.close();
+        } catch (IOException e) {
+            System.out.println(" [Warning] Could not save tasks: " + e.getMessage());
+        }
+    }
+
+    public static ArrayList<Task> loadTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        File file = new File(FILE_PATH);
+
+        if (!file.exists()) {
+            return tasks;
+        }
+
+        try (Scanner sc = new Scanner(file)) {
+            int lineNum = 0;
+            while (sc.hasNextLine()) {
+                lineNum++;
+                String line = sc.nextLine().trim();
+                if (line.isEmpty()) continue;
+
+                try {
+                    String[] parts = line.split(" \\| ");
+
+                    if (parts.length < 3) {
+                        System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
+                        continue;
+                    }
+
+                    String type = parts[0].trim();
+                    boolean done = parts[1].trim().equals("1");
+                    String name = parts[2].trim();
+
+                    Task task;
+                    switch (type) {
+                        case "T":
+                            task = new ToDo(name);
+                            break;
+                        case "D":
+                            if (parts.length < 4) {
+                                System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum + ": " + line);
+                                continue;
+                            }
+                            task = new Deadline(name, parts[3].trim());
+                            break;
+                        case "E":
+                            if (parts.length < 5) {
+                                System.out.println(" [Warning] Skipping corrupted event at line " + lineNum + ": " + line);
+                                continue;
+                            }
+                            task = new Event(name, parts[3].trim(), parts[4].trim());
+                            break;
+                        default:
+                            System.out.println(" [Warning] Skipping unknown task type at line " + lineNum + ": " + line);
+                            continue;
+                    }
+
+                    if (done) task.markDone();
+                    tasks.add(task);
+
+                } catch (Exception e) {
+                    System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(" [Warning] Could not load tasks: " + e.getMessage());
+        }
+
+        return tasks;
+    }
+
     public static void main(String[] args) {
         String line = "─".repeat(70);
         String solidline = "━".repeat(70);
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks = loadTasks();
+        saveTasks(tasks);
 
         String banner = "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
                         "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
@@ -157,7 +256,7 @@ public class Puyo {
 
                 case MARK:
                     try {
-                        int index = Integer.parseInt(input.substring(4).trim()) - 1;
+                        int index = Integer.parseInt(input.substring(5).trim()) - 1;
                         if (index >= 0 && index < tasks.size()) {
                             Task task = tasks.get(index);
                             if (task.done) {
@@ -166,6 +265,7 @@ public class Puyo {
                                 task.markDone();
                                 System.out.println(" Amazing! Don't forget to take a rest!");
                                 System.out.println(" " + task);
+                                saveTasks(tasks);
                             }
                         } else {
                             System.out.println(" Invalid task number.");
@@ -177,7 +277,7 @@ public class Puyo {
 
                 case UNMARK:
                     try {
-                        int index = Integer.parseInt(input.substring(6).trim()) - 1;
+                        int index = Integer.parseInt(input.substring(7).trim()) - 1;
                         if (index >= 0 && index < tasks.size()) {
                             Task task = tasks.get(index);
                             if (!task.done) {
@@ -186,6 +286,7 @@ public class Puyo {
                                 task.unmark();
                                 System.out.println(" Don't forget to " + task.name + "!");
                                 System.out.println(" " + task);
+                                saveTasks(tasks);
                             }
                         } else {
                             System.out.println(" Invalid task number.");
@@ -197,12 +298,13 @@ public class Puyo {
 
                 case DELETE:
                     try {
-                        int index = Integer.parseInt(input.substring(6).trim()) - 1;
+                        int index = Integer.parseInt(input.substring(7).trim()) - 1;
                         if (index >= 0 && index < tasks.size()) {
                             Task removedTask = tasks.remove(index);
                             System.out.println(" Noted. I've removed this task:");
                             System.out.println("   " + removedTask);
                             System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+                            saveTasks(tasks);
                         } else {
                             System.out.println(" Invalid task number.");
                         }
@@ -216,11 +318,12 @@ public class Puyo {
                     if (todoDesc.isEmpty()) {
                         System.out.println("The description of a todo can't be empty!");
                     } else {
-                        Task newTask = new ToDo(todoDesc);
-                        tasks.add(newTask);
+                        Task newTodo = new ToDo(todoDesc);
+                        tasks.add(newTodo);
                         System.out.println(" Don't forget to do this!");
-                        System.out.println(" " + newTask);
+                        System.out.println(" " + newTodo);
                         System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
+                        saveTasks(tasks);
                     }
                     break;
 
@@ -230,18 +333,18 @@ public class Puyo {
                         System.out.println("Please enter a valid deadline by using '/by'!");
                         break;
                     }
-                    String[] deadlineParts = input.substring(8).split("/by", 2);
+                    String[] deadlineParts = input.substring(9).split("/by", 2);
                     String deadlineName = deadlineParts[0].trim();
                     String by = (deadlineParts.length > 1) ? deadlineParts[1].trim() : "";
-
                     if (deadlineName.isEmpty() || by.isEmpty()) {
                         System.out.println("The description or time of a deadline can't be empty!");
                     } else {
-                        Task newTask = new Deadline(deadlineName, by);
-                        tasks.add(newTask);
+                        Task newDeadline = new Deadline(deadlineName, by);
+                        tasks.add(newDeadline);
                         System.out.println(" Don't forget to do this!");
-                        System.out.println(" " + newTask);
+                        System.out.println(" " + newDeadline);
                         System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
+                        saveTasks(tasks);
                     }
                     break;
 
@@ -249,7 +352,6 @@ public class Puyo {
                     String lowerInputEvent = input.toLowerCase();
                     boolean hasFrom = lowerInputEvent.contains("/from");
                     boolean hasTo = lowerInputEvent.contains("/to");
-
                     if (!hasFrom && !hasTo) {
                         System.out.println("Please enter a valid event timing by using '/from' and '/to'!");
                         break;
@@ -263,25 +365,23 @@ public class Puyo {
                         System.out.println("Please enter a valid event timing by putting '/from' before '/to'!");
                         break;
                     }
-
-                    String[] eventParts = input.substring(5).split("/from|/to");
+                    String[] eventParts = input.substring(6).split("/from|/to");
                     if (eventParts.length < 3) {
                         System.out.println("Event description, '/from', or '/to' cannot be empty!");
                         break;
                     }
-
                     String eventName = eventParts[0].trim();
                     String from = eventParts[1].trim();
                     String to = eventParts[2].trim();
-
                     if (eventName.isEmpty() || from.isEmpty() || to.isEmpty()) {
                         System.out.println("Event description, '/from', or '/to' cannot be empty!");
                     } else {
-                        Task newTask = new Event(eventName, from, to);
-                        tasks.add(newTask);
+                        Task newEvent = new Event(eventName, from, to);
+                        tasks.add(newEvent);
                         System.out.println(" Don't forget to do this!");
-                        System.out.println(" " + newTask);
+                        System.out.println(" " + newEvent);
                         System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
+                        saveTasks(tasks);
                     }
                     break;
 
