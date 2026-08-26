@@ -3,6 +3,10 @@ import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class Puyo {
 
@@ -25,6 +29,12 @@ public class Puyo {
             return code;
         }
     }
+
+    static final DateTimeFormatter INPUT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    static final DateTimeFormatter INPUT_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    static final DateTimeFormatter DISPLAY_DATE = DateTimeFormatter.ofPattern("MMM dd yyyy");
+    static final DateTimeFormatter DISPLAY_DATETIME = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
+    static final DateTimeFormatter SAVE_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
     static abstract class Task {
         String name;
@@ -62,29 +72,29 @@ public class Puyo {
     }
 
     public static class Deadline extends Task {
-        String by;
+        LocalDateTime by;
 
-        public Deadline(String description, String by) {
+        public Deadline(String description, LocalDateTime by) {
             super(description, TaskType.DEADLINE);
             this.by = by;
         }
 
         @Override
         public String toFileString() {
-            return super.toFileString() + " | " + by;
+            return super.toFileString() + " | " + by.format(SAVE_DATETIME);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " (by: " + by + ")";
+            return super.toString() + " (by: " + by.format(DISPLAY_DATETIME) + ")";
         }
     }
 
     public static class Event extends Task {
-        String start;
-        String end;
+        LocalDateTime start;
+        LocalDateTime end;
 
-        public Event(String description, String start, String end) {
+        public Event(String description, LocalDateTime start, LocalDateTime end) {
             super(description, TaskType.EVENT);
             this.start = start;
             this.end = end;
@@ -92,12 +102,26 @@ public class Puyo {
 
         @Override
         public String toFileString() {
-            return super.toFileString() + " | " + start + " | " + end;
+            return super.toFileString() + " | " + start.format(SAVE_DATETIME) + " | " + end.format(SAVE_DATETIME);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " (from: " + start + " to: " + end + ")";
+            return super.toString() + " (from: " + start.format(DISPLAY_DATETIME) + " to: " + end.format(DISPLAY_DATETIME) + ")";
+        }
+    }
+
+    public static LocalDateTime parseDateTime(String raw) {
+        raw = raw.trim();
+        try {
+            return LocalDateTime.parse(raw, INPUT_DATETIME);
+        } catch (DateTimeParseException e1) {
+            try {
+                LocalDate date = LocalDate.parse(raw, INPUT_DATE);
+                return date.atStartOfDay();
+            } catch (DateTimeParseException e2) {
+                return null;
+            }
         }
     }
 
@@ -149,7 +173,6 @@ public class Puyo {
 
                 try {
                     String[] parts = line.split(" \\| ");
-
                     if (parts.length < 3) {
                         System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
                         continue;
@@ -158,8 +181,8 @@ public class Puyo {
                     String type = parts[0].trim();
                     boolean done = parts[1].trim().equals("1");
                     String name = parts[2].trim();
-
                     Task task;
+
                     switch (type) {
                         case "T":
                             task = new ToDo(name);
@@ -169,14 +192,25 @@ public class Puyo {
                                 System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum + ": " + line);
                                 continue;
                             }
-                            task = new Deadline(name, parts[3].trim());
+                            LocalDateTime deadlineBy = parseDateTime(parts[3].trim());
+                            if (deadlineBy == null) {
+                                System.out.println(" [Warning] Skipping corrupted deadline date at line " + lineNum + ": " + line);
+                                continue;
+                            }
+                            task = new Deadline(name, deadlineBy);
                             break;
                         case "E":
                             if (parts.length < 5) {
                                 System.out.println(" [Warning] Skipping corrupted event at line " + lineNum + ": " + line);
                                 continue;
                             }
-                            task = new Event(name, parts[3].trim(), parts[4].trim());
+                            LocalDateTime eventStart = parseDateTime(parts[3].trim());
+                            LocalDateTime eventEnd = parseDateTime(parts[4].trim());
+                            if (eventStart == null || eventEnd == null) {
+                                System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum + ": " + line);
+                                continue;
+                            }
+                            task = new Event(name, eventStart, eventEnd);
                             break;
                         default:
                             System.out.println(" [Warning] Skipping unknown task type at line " + lineNum + ": " + line);
@@ -202,14 +236,14 @@ public class Puyo {
         String solidline = "━".repeat(70);
 
         ArrayList<Task> tasks = loadTasks();
-        saveTasks(tasks);
+        boolean hasInteracted = false;
 
         String banner = "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
-                        "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
-                        "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
-                        "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +
-                        "██║     ╚██████╔╝   ██║   ╚██████╔╝\n" +
-                        "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
+                "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
+                "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
+                "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +
+                "██║     ╚██████╔╝   ██║   ╚██████╔╝\n" +
+                "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
 
         System.out.println(solidline);
         System.out.println(banner);
@@ -237,6 +271,9 @@ public class Puyo {
             CommandType command = parseCommand(input);
 
             if (command == CommandType.BYE) {
+                if (!hasInteracted) {
+                    saveTasks(new ArrayList<>());
+                }
                 System.out.println("Okay. See you again! Bye!");
                 System.out.println(line);
                 break;
@@ -266,6 +303,7 @@ public class Puyo {
                                 System.out.println(" Amazing! Don't forget to take a rest!");
                                 System.out.println(" " + task);
                                 saveTasks(tasks);
+                                hasInteracted = true;
                             }
                         } else {
                             System.out.println(" Invalid task number.");
@@ -287,6 +325,7 @@ public class Puyo {
                                 System.out.println(" Don't forget to " + task.name + "!");
                                 System.out.println(" " + task);
                                 saveTasks(tasks);
+                                hasInteracted = true;
                             }
                         } else {
                             System.out.println(" Invalid task number.");
@@ -305,6 +344,7 @@ public class Puyo {
                             System.out.println("   " + removedTask);
                             System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
                             saveTasks(tasks);
+                            hasInteracted = true;
                         } else {
                             System.out.println(" Invalid task number.");
                         }
@@ -324,6 +364,7 @@ public class Puyo {
                         System.out.println(" " + newTodo);
                         System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
                         saveTasks(tasks);
+                        hasInteracted = true;
                     }
                     break;
 
@@ -335,17 +376,23 @@ public class Puyo {
                     }
                     String[] deadlineParts = input.substring(9).split("/by", 2);
                     String deadlineName = deadlineParts[0].trim();
-                    String by = (deadlineParts.length > 1) ? deadlineParts[1].trim() : "";
-                    if (deadlineName.isEmpty() || by.isEmpty()) {
+                    String byRaw = (deadlineParts.length > 1) ? deadlineParts[1].trim() : "";
+                    if (deadlineName.isEmpty() || byRaw.isEmpty()) {
                         System.out.println("The description or time of a deadline can't be empty!");
-                    } else {
-                        Task newDeadline = new Deadline(deadlineName, by);
-                        tasks.add(newDeadline);
-                        System.out.println(" Don't forget to do this!");
-                        System.out.println(" " + newDeadline);
-                        System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
-                        saveTasks(tasks);
+                        break;
                     }
+                    LocalDateTime byDateTime = parseDateTime(byRaw);
+                    if (byDateTime == null) {
+                        System.out.println("Invalid date format! Use: yyyy-MM-dd or yyyy-MM-dd HHmm (e.g. 2019-12-02 1800)");
+                        break;
+                    }
+                    Task newDeadline = new Deadline(deadlineName, byDateTime);
+                    tasks.add(newDeadline);
+                    System.out.println(" Don't forget to do this!");
+                    System.out.println(" " + newDeadline);
+                    System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
+                    saveTasks(tasks);
+                    hasInteracted = true;
                     break;
 
                 case EVENT:
@@ -371,18 +418,25 @@ public class Puyo {
                         break;
                     }
                     String eventName = eventParts[0].trim();
-                    String from = eventParts[1].trim();
-                    String to = eventParts[2].trim();
-                    if (eventName.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                    String fromRaw = eventParts[1].trim();
+                    String toRaw = eventParts[2].trim();
+                    if (eventName.isEmpty() || fromRaw.isEmpty() || toRaw.isEmpty()) {
                         System.out.println("Event description, '/from', or '/to' cannot be empty!");
-                    } else {
-                        Task newEvent = new Event(eventName, from, to);
-                        tasks.add(newEvent);
-                        System.out.println(" Don't forget to do this!");
-                        System.out.println(" " + newEvent);
-                        System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
-                        saveTasks(tasks);
+                        break;
                     }
+                    LocalDateTime fromDateTime = parseDateTime(fromRaw);
+                    LocalDateTime toDateTime = parseDateTime(toRaw);
+                    if (fromDateTime == null || toDateTime == null) {
+                        System.out.println("Invalid date format! Use: yyyy-MM-dd or yyyy-MM-dd HHmm (e.g. 2019-12-02 1800)");
+                        break;
+                    }
+                    Task newEvent = new Event(eventName, fromDateTime, toDateTime);
+                    tasks.add(newEvent);
+                    System.out.println(" Don't forget to do this!");
+                    System.out.println(" " + newEvent);
+                    System.out.println(" (You now have " + tasks.size() + " tasks to do! Good luck!)");
+                    saveTasks(tasks);
+                    hasInteracted = true;
                     break;
 
                 case UNKNOWN:
