@@ -1,15 +1,16 @@
 package puyo.task;
 
-import puyo.parser.Parser;
 import java.time.LocalDateTime;
+
+import puyo.parser.Parser;
 
 /**
  * Represents an event task that occurs within a specific start and end time.
  */
 public class Event extends Task {
 
-    LocalDateTime start;
-    LocalDateTime end;
+    private final LocalDateTime start;
+    private final LocalDateTime end;
 
     /**
      * Constructs an {@code Event} task with the specified description, start time, and end time.
@@ -31,7 +32,8 @@ public class Event extends Task {
      */
     @Override
     public String toFileString() {
-        return super.toFileString() + " | " + start.format(Parser.SAVE_DATETIME) + " | " + end.format(Parser.SAVE_DATETIME);
+        return super.toFileString() + " | " + start.format(Parser.SAVE_DATETIME) + " | "
+                + end.format(Parser.SAVE_DATETIME);
     }
 
     /**
@@ -41,6 +43,7 @@ public class Event extends Task {
      */
     @Override
     public String toString() {
-        return super.toString() + " (from: " + start.format(Parser.DISPLAY_DATETIME) + " to: " + end.format(Parser.DISPLAY_DATETIME) + ")";
+        return super.toString() + " (from: " + start.format(Parser.DISPLAY_DATETIME) + " to: "
+                + end.format(Parser.DISPLAY_DATETIME) + ")";
     }
 }

@@ -5,9 +5,9 @@ package puyo.task;
  */
 public abstract class Task {
 
-    private String name;
+    private final String name;
     private boolean done;
-    private TaskType type;
+    private final TaskType type;
 
     /**
      * Constructs a {@code Task} with the specified name and type.
@@ -15,7 +15,7 @@ public abstract class Task {
      * @param name The description or name of the task.
      * @param type The type of the task (e.g., TODO, DEADLINE, EVENT).
      */
-    Task(String name, TaskType type) {
+    protected Task(String name, TaskType type) {
         this.name = name.trim();
         this.done = false;
         this.type = type;

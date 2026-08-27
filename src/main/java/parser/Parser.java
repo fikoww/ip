@@ -1,12 +1,22 @@
 package puyo.parser;
 
-import puyo.PuyoException;
-import puyo.command.*;
-import puyo.task.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import puyo.PuyoException;
+import puyo.command.AddCommand;
+import puyo.command.ByeCommand;
+import puyo.command.Command;
+import puyo.command.DeleteCommand;
+import puyo.command.ListCommand;
+import puyo.command.MarkCommand;
+import puyo.command.UnknownCommand;
+import puyo.command.UnmarkCommand;
+import puyo.task.Deadline;
+import puyo.task.Event;
+import puyo.task.ToDo;
 
 /**
  * Parses user input strings into executable {@code Command} objects.
@@ -38,15 +48,24 @@ public class Parser {
         }
         String firstWord = input.split(" ")[0].toLowerCase();
         switch (firstWord) {
-            case "bye": return new ByeCommand();
-            case "list": return new ListCommand();
-            case "mark": return parseIndexCommand("mark", input, 5);
-            case "unmark": return parseIndexCommand("unmark", input, 7);
-            case "delete": return parseDeleteCommand(input);
-            case "todo": return parseTodoCommand(input);
-            case "deadline": return parseDeadlineCommand(input);
-            case "event": return parseEventCommand(input);
-            default: return new UnknownCommand();
+            case "bye":
+                return new ByeCommand();
+            case "list":
+                return new ListCommand();
+            case "mark":
+                return parseIndexCommand("mark", input, 5);
+            case "unmark":
+                return parseIndexCommand("unmark", input, 7);
+            case "delete":
+                return parseDeleteCommand(input);
+            case "todo":
+                return parseTodoCommand(input);
+            case "deadline":
+                return parseDeadlineCommand(input);
+            case "event":
+                return parseEventCommand(input);
+            default:
+                return new UnknownCommand();
         }
     }
 

@@ -1,14 +1,15 @@
 package puyo.task;
 
-import puyo.parser.Parser;
 import java.time.LocalDateTime;
+
+import puyo.parser.Parser;
 
 /**
  * Represents a task that needs to be completed before a specific deadline.
  */
 public class Deadline extends Task {
 
-    LocalDateTime by;
+    private final LocalDateTime by;
 
     /**
      * Constructs a {@code Deadline} task with the specified description and due date/time.
