@@ -2,9 +2,9 @@ package puyo.task;
 
 public abstract class Task {
 
-    String name;
-    boolean done;
-    TaskType type;
+    private String name;
+    private boolean done;
+    private TaskType type;
 
     Task(String name, TaskType type) {
         this.name = name.trim();
@@ -12,12 +12,20 @@ public abstract class Task {
         this.type = type;
     }
 
-    void markDone() {
+    public void markDone() {
         this.done = true;
     }
 
-    void unmark() {
+    public void unmark() {
         this.done = false;
+    }
+
+    public boolean getDone() {
+        return this.done;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public String toFileString() {

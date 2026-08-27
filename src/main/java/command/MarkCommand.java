@@ -11,6 +11,7 @@ public class MarkCommand extends Command {
     private final int index;
 
     public MarkCommand(int index) {
+
         this.index = index;
     }
 
@@ -20,7 +21,7 @@ public class MarkCommand extends Command {
             throw new PuyoException("Invalid task number.");
         }
         Task task = tasks.get(index);
-        if (task.done) {
+        if (task.getDone()) {
             ui.showMessage(" You indeed have done this task!");
         } else {
             task.markDone();

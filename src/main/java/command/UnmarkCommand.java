@@ -20,11 +20,11 @@ public class UnmarkCommand extends Command {
             throw new PuyoException("Invalid task number.");
         }
         Task task = tasks.get(index);
-        if (!task.done) {
+        if (!task.getDone()) {
             ui.showMessage(" You indeed haven't done this task!");
         } else {
             task.unmark();
-            ui.showMessage(" Don't forget to " + task.name + "!");
+            ui.showMessage(" Don't forget to " + task.getName() + "!");
             ui.showMessage(" " + task);
             storage.save(tasks);
         }
