@@ -17,6 +17,10 @@ public class Storage {
         this.filePath = filePath;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
