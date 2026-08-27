@@ -1,4 +1,6 @@
-package PACKAGE_NAME;
+public class ToDo extends Task {
 
-public class ToDo {
+    public ToDo(String description) {
+        super(description, TaskType.TODO);
+    }
 }
