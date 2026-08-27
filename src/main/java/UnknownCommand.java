@@ -1,4 +1,7 @@
-package PACKAGE_NAME;
+public class UnknownCommand extends Command {
 
-public class UnknownCommand {
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) throws PuyoException {
+        throw new PuyoException("Sorry! I don't understand that command!");
+    }
 }

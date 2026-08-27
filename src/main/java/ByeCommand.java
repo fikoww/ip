@@ -1,4 +1,13 @@
-package PACKAGE_NAME;
+public class ByeCommand extends Command {
 
-public class ByeCommand {
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) throws PuyoException {
+        storage.save(tasks);
+        ui.showBye();
+    }
+
+    @Override
+    public boolean isExit() {
+        return true;
+    }
 }

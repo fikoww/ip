@@ -1,4 +1,7 @@
-package PACKAGE_NAME;
+public class ListCommand extends Command {
 
-public class ListCommand {
+    @Override
+    public void execute(TaskList tasks, Ui ui, Storage storage) throws PuyoException {
+        ui.showTaskList(tasks);
+    }
 }
