@@ -1,4 +1,15 @@
-package PACKAGE_NAME;
+public enum TaskType {
+    TODO("T"),
+    DEADLINE("D"),
+    EVENT("E");
 
-public class TaskType {
+    private final String code;
+
+    TaskType(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
 }
