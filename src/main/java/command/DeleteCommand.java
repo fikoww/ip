@@ -1,3 +1,11 @@
+package puyo.command;
+
+import puyo.PuyoException;
+import puyo.storage.Storage;
+import puyo.task.Task;
+import puyo.task.TaskList;
+import puyo.ui.Ui;
+
 public class DeleteCommand extends Command {
 
     private final int index;

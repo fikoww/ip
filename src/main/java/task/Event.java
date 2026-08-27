@@ -1,3 +1,6 @@
+package puyo.task;
+
+import puyo.parser.Parser;
 import java.time.LocalDateTime;
 
 public class Event extends Task {

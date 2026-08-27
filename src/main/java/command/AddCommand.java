@@ -1,3 +1,11 @@
+package puyo.command;
+
+import puyo.PuyoException;
+import puyo.storage.Storage;
+import puyo.task.Task;
+import puyo.task.TaskList;
+import puyo.ui.Ui;
+
 public class AddCommand extends Command {
 
     private final Task task;

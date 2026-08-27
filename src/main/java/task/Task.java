@@ -1,3 +1,5 @@
+package puyo.task;
+
 public abstract class Task {
 
     String name;

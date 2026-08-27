@@ -1,3 +1,7 @@
+package puyo.ui;
+
+import puyo.task.Task;
+import puyo.task.TaskList;
 import java.util.Scanner;
 
 public class Ui {
@@ -5,7 +9,7 @@ public class Ui {
     private static final String LINE = "─".repeat(70);
     private static final String SOLID_LINE = "━".repeat(70);
     private static final String BANNER =
-            "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
+                    "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
                     "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
                     "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
                     "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +

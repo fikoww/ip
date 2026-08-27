@@ -1,3 +1,10 @@
+package puyo;
+
+import puyo.command.Command;
+import puyo.parser.Parser;
+import puyo.storage.Storage;
+import puyo.task.TaskList;
+import puyo.ui.Ui;
 import java.io.File;
 
 public class Puyo {

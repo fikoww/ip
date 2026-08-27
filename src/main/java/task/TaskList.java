@@ -1,3 +1,5 @@
+package puyo.task;
+
 import java.util.ArrayList;
 
 public class TaskList {

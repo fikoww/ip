@@ -1,3 +1,10 @@
+package puyo.command;
+
+import puyo.PuyoException;
+import puyo.storage.Storage;
+import puyo.task.TaskList;
+import puyo.ui.Ui;
+
 public class UnknownCommand extends Command {
 
     @Override

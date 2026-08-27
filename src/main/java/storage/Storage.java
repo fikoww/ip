@@ -1,3 +1,7 @@
+package puyo.storage;
+
+import puyo.parser.Parser;
+import puyo.task.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
