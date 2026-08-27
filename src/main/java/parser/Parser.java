@@ -1,38 +1,83 @@
 package puyo.parser;
 
-import puyo.PuyoException;
-import puyo.command.*;
-import puyo.task.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import puyo.PuyoException;
+import puyo.command.AddCommand;
+import puyo.command.ByeCommand;
+import puyo.command.Command;
+import puyo.command.DeleteCommand;
+import puyo.command.ListCommand;
+import puyo.command.MarkCommand;
+import puyo.command.UnknownCommand;
+import puyo.command.UnmarkCommand;
+import puyo.task.Deadline;
+import puyo.task.Event;
+import puyo.task.ToDo;
+
+/**
+ * Parses user input strings into executable {@code Command} objects.
+ */
 public class Parser {
 
+    /** Formatter for input dates in YYYY-MM-DD format. */
     public static final DateTimeFormatter INPUT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    /** Formatter for input date and time in YYYY-MM-DD HHmm format. */
     public static final DateTimeFormatter INPUT_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+    /** Formatter for displaying date and time in user interface. */
     public static final DateTimeFormatter DISPLAY_DATETIME = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
+
+    /** Formatter for saving date and time into storage files. */
     public static final DateTimeFormatter SAVE_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
+    /**
+     * Parses the raw user input into a corresponding {@code Command}.
+     *
+     * @param input The raw input string from the user.
+     * @return The parsed {@code Command} object to be executed.
+     * @throws PuyoException If the input format is invalid or empty.
+     */
     public static Command parse(String input) throws PuyoException {
         if (input.isBlank()) {
             throw new PuyoException("Please enter a non-empty valid command!");
         }
         String firstWord = input.split(" ")[0].toLowerCase();
         switch (firstWord) {
-            case "bye": return new ByeCommand();
-            case "list": return new ListCommand();
-            case "mark": return parseIndexCommand("mark", input, 5);
-            case "unmark": return parseIndexCommand("unmark", input, 7);
-            case "delete": return parseDeleteCommand(input);
-            case "todo": return parseTodoCommand(input);
-            case "deadline": return parseDeadlineCommand(input);
-            case "event": return parseEventCommand(input);
-            default: return new UnknownCommand();
+            case "bye":
+                return new ByeCommand();
+            case "list":
+                return new ListCommand();
+            case "mark":
+                return parseIndexCommand("mark", input, 5);
+            case "unmark":
+                return parseIndexCommand("unmark", input, 7);
+            case "delete":
+                return parseDeleteCommand(input);
+            case "todo":
+                return parseTodoCommand(input);
+            case "deadline":
+                return parseDeadlineCommand(input);
+            case "event":
+                return parseEventCommand(input);
+            default:
+                return new UnknownCommand();
         }
     }
 
+    /**
+     * Parses commands that require a single task index (mark/unmark).
+     *
+     * @param type The command type string ("mark" or "unmark").
+     * @param input The full user input string.
+     * @param offset The character index offset to start parsing the task number.
+     * @return The corresponding {@code MarkCommand} or {@code UnmarkCommand}.
+     * @throws PuyoException If the index argument is invalid or missing.
+     */
     private static Command parseIndexCommand(String type, String input, int offset) throws PuyoException {
         try {
             int index = Integer.parseInt(input.substring(offset).trim()) - 1;
@@ -42,6 +87,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a delete command input string.
+     *
+     * @param input The full user input string.
+     * @return A {@code DeleteCommand} containing the target index.
+     * @throws PuyoException If the index argument is invalid or missing.
+     */
     private static Command parseDeleteCommand(String input) throws PuyoException {
         try {
             int index = Integer.parseInt(input.substring(7).trim()) - 1;
@@ -51,6 +103,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a todo command input string.
+     *
+     * @param input The full user input string.
+     * @return An {@code AddCommand} containing the created {@code ToDo} task.
+     * @throws PuyoException If the description is empty.
+     */
     private static Command parseTodoCommand(String input) throws PuyoException {
         String desc = input.substring(4).trim();
         if (desc.isEmpty()) {
@@ -59,6 +118,13 @@ public class Parser {
         return new AddCommand(new ToDo(desc));
     }
 
+    /**
+     * Parses a deadline command input string.
+     *
+     * @param input The full user input string.
+     * @return An {@code AddCommand} containing the created {@code Deadline} task.
+     * @throws PuyoException If the arguments or date format are invalid.
+     */
     private static Command parseDeadlineCommand(String input) throws PuyoException {
         if (!input.toLowerCase().contains("/by")) {
             throw new PuyoException("Please enter a valid deadline by using '/by'!");
@@ -76,6 +142,13 @@ public class Parser {
         return new AddCommand(new Deadline(name, by));
     }
 
+    /**
+     * Parses an event command input string.
+     *
+     * @param input The full user input string.
+     * @return An {@code AddCommand} containing the created {@code Event} task.
+     * @throws PuyoException If the arguments or date formats are invalid.
+     */
     private static Command parseEventCommand(String input) throws PuyoException {
         String lower = input.toLowerCase();
         boolean hasFrom = lower.contains("/from");
@@ -107,6 +180,12 @@ public class Parser {
         return new AddCommand(new Event(name, fromDT, toDT));
     }
 
+    /**
+     * Parses a date or date-time string into a {@code LocalDateTime} object.
+     *
+     * @param raw The raw date string.
+     * @return Parsed {@code LocalDateTime} object, or {@code null} if parsing fails.
+     */
     public static LocalDateTime parseDateTime(String raw) {
         raw = raw.trim();
         try {
