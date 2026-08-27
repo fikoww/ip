@@ -17,6 +17,7 @@ import puyo.command.UnmarkCommand;
 import puyo.task.Deadline;
 import puyo.task.Event;
 import puyo.task.ToDo;
+import puyo.command.FindCommand;
 
 /**
  * Parses user input strings into executable {@code Command} objects.
@@ -64,6 +65,8 @@ public class Parser {
                 return parseDeadlineCommand(input);
             case "event":
                 return parseEventCommand(input);
+            case "find":
+                return parseFindCommand(input);
             default:
                 return new UnknownCommand();
         }
@@ -197,5 +200,20 @@ public class Parser {
                 return null;
             }
         }
+    }
+
+    /**
+     * Parses a find command input string.
+     *
+     * @param input The full user input string.
+     * @return A {@code FindCommand} with the specified search keyword.
+     * @throws PuyoException If the search keyword is empty.
+     */
+    private static Command parseFindCommand(String input) throws PuyoException {
+        String keyword = input.substring(4).trim();
+        if (keyword.isEmpty()) {
+            throw new PuyoException("The search keyword cannot be empty!");
+        }
+        return new FindCommand(keyword);
     }
 }
