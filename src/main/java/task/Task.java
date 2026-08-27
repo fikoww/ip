@@ -1,37 +1,72 @@
 package puyo.task;
 
+/**
+ * Represents an abstract task managed by the application.
+ */
 public abstract class Task {
 
     private String name;
     private boolean done;
     private TaskType type;
 
+    /**
+     * Constructs a {@code Task} with the specified name and type.
+     *
+     * @param name The description or name of the task.
+     * @param type The type of the task (e.g., TODO, DEADLINE, EVENT).
+     */
     Task(String name, TaskType type) {
         this.name = name.trim();
         this.done = false;
         this.type = type;
     }
 
+    /**
+     * Marks the task as completed.
+     */
     public void markDone() {
         this.done = true;
     }
 
+    /**
+     * Marks the task as incomplete.
+     */
     public void unmark() {
         this.done = false;
     }
 
+    /**
+     * Returns whether the task has been completed.
+     *
+     * @return {@code true} if completed, {@code false} otherwise.
+     */
     public boolean getDone() {
         return this.done;
     }
 
+    /**
+     * Returns the name or description of the task.
+     *
+     * @return The task name string.
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Formats the task into a plain text representation suitable for file storage.
+     *
+     * @return Formatted string representation for file saving.
+     */
     public String toFileString() {
         return type.getCode() + " | " + (done ? "1" : "0") + " | " + name;
     }
 
+    /**
+     * Formats the task into a human-readable representation for UI display.
+     *
+     * @return Formatted string representation of the task.
+     */
     @Override
     public String toString() {
         return "[" + type.getCode() + "]" + (done ? "[✓]" : "[X]") + " " + name;

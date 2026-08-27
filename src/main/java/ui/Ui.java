@@ -4,6 +4,9 @@ import puyo.task.Task;
 import puyo.task.TaskList;
 import java.util.Scanner;
 
+/**
+ * Handles user interface interactions, including reading inputs and displaying output messages.
+ */
 public class Ui {
 
     private static final String LINE = "─".repeat(70);
@@ -18,10 +21,16 @@ public class Ui {
 
     private final Scanner scanner;
 
+    /**
+     * Constructs a {@code Ui} instance initialized with standard system input scanner.
+     */
     public Ui() {
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Displays the welcome banner and introductory message to the user.
+     */
     public void showWelcome() {
         System.out.println(SOLID_LINE);
         System.out.println(BANNER);
@@ -34,22 +43,43 @@ public class Ui {
         System.out.println(SOLID_LINE);
     }
 
+    /**
+     * Displays the farewell message when the user exits the application.
+     */
     public void showBye() {
         System.out.println("Okay. See you again! Bye!");
     }
 
+    /**
+     * Displays a thin horizontal separator line.
+     */
     public void showLine() {
         System.out.println(LINE);
     }
 
+    /**
+     * Displays a generic output message.
+     *
+     * @param message The text message to display.
+     */
     public void showMessage(String message) {
         System.out.println(message);
     }
 
+    /**
+     * Displays an error message formatted with an error prefix.
+     *
+     * @param message The error message text.
+     */
     public void showError(String message) {
         System.out.println(" Error: " + message);
     }
 
+    /**
+     * Displays the full list of tasks to the user.
+     *
+     * @param tasks The {@code TaskList} containing tasks to be printed.
+     */
     public void showTaskList(TaskList tasks) {
         System.out.println("(Note: X means you haven't done the task yet, ✓ means you have done the task)");
         if (tasks.isEmpty()) {
@@ -61,17 +91,31 @@ public class Ui {
         }
     }
 
+    /**
+     * Displays a confirmation message after a new task has been added.
+     *
+     * @param task The task that was added.
+     * @param totalTasks The current total number of tasks in the list.
+     */
     public void showTaskAdded(Task task, int totalTasks) {
         System.out.println(" Don't forget to do this!");
         System.out.println(" " + task);
         System.out.println(" (You now have " + totalTasks + " tasks to do! Good luck!)");
     }
 
+    /**
+     * Reads a line of command input from the user.
+     *
+     * @return Trimmed command input string.
+     */
     public String readCommand() {
         System.out.print("> ");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Closes the underlying input scanner.
+     */
     public void close() {
         scanner.close();
     }
