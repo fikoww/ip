@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import puyo.command.FindCommand;
 
 public class Parser {
 
@@ -29,6 +30,7 @@ public class Parser {
             case "todo": return parseTodoCommand(input);
             case "deadline": return parseDeadlineCommand(input);
             case "event": return parseEventCommand(input);
+            case "find": return parseFindCommand(input);
             default: return new UnknownCommand();
         }
     }
@@ -118,5 +120,20 @@ public class Parser {
                 return null;
             }
         }
+    }
+
+    /**
+     * Parses a find command input string.
+     *
+     * @param input The full user input string.
+     * @return A {@code FindCommand} with the specified keyword.
+     * @throws PuyoException If the keyword is empty.
+     */
+    private static Command parseFindCommand(String input) throws PuyoException {
+        String keyword = input.substring(4).trim();
+        if (keyword.isEmpty()) {
+            throw new PuyoException("The search keyword cannot be empty!");
+        }
+        return new FindCommand(keyword);
     }
 }

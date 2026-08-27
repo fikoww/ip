@@ -67,6 +67,22 @@ public class Ui {
         System.out.println(" (You now have " + totalTasks + " tasks to do! Good luck!)");
     }
 
+    /**
+     * Displays tasks that match a search query.
+     *
+     * @param tasks The {@code TaskList} containing matching tasks.
+     */
+    public void showFoundTasks(TaskList tasks) {
+        if (tasks.isEmpty()) {
+            System.out.println(" No matching tasks found!");
+        } else {
+            System.out.println(" Here are the matching tasks in your list:");
+            for (int i = 0; i < tasks.size(); i++) {
+                System.out.println(" " + (i + 1) + "." + tasks.get(i));
+            }
+        }
+    }
+
     public String readCommand() {
         System.out.print("> ");
         return scanner.nextLine().trim();
