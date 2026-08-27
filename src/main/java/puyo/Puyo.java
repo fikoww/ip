@@ -19,6 +19,7 @@ public class Puyo {
         tasks = new TaskList(storage.load());
     }
 
+
     public void run() {
         ui.showWelcome();
         boolean isExit = false;
@@ -28,10 +29,10 @@ public class Puyo {
                 ui.showLine();
                 Command c = Parser.parse(fullCommand);
                 c.execute(tasks, ui, storage);
-                isExit = c.isExit();
+                isExit = c.isExit();  // ← harus di dalam try, setelah execute
             } catch (PuyoException e) {
                 ui.showError(e.getMessage());
-            } finally {
+            }  finally {
                 ui.showLine();
             }
         }
