@@ -52,7 +52,7 @@ test {
 }
 
 application {
-    mainClass.set("Launcher")
+    mainClass = 'puyo.Launcher'
 }
 
 jar {

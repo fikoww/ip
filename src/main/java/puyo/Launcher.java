@@ -1,8 +1,8 @@
-import javafx.application.Application;
+package puyo;
 
-/**
- * A launcher class to workaround classpath issues.
- */
+import javafx.application.Application;
+import puyo.Main;
+
 public class Launcher {
     public static void main(String[] args) {
         Application.launch(Main.class, args);
