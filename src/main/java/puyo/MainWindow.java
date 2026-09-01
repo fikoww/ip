@@ -1,5 +1,6 @@
 package puyo;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -26,19 +27,21 @@ public class MainWindow extends AnchorPane {
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/user.png"));
     private Image puyoImage = new Image(this.getClass().getResourceAsStream("/images/puyo.png"));
 
-    @FXML
-    public void initialize() {
-        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
-    }
-
     public void setPuyo(Puyo puyo) {
         this.puyo = puyo;
     }
 
-    /**
-     * Creates two dialog boxes, one echoing user input and the other containing Puyo's reply and then appends them to
-     * the dialog container. Clears the user input after processing.
-     */
+    @FXML
+    public void initialize() {
+        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        // Welcome message dari Puyo
+        String welcomeMessage = "Hello! I'm Puyo!\nWhat can I do for you today?";
+        dialogContainer.getChildren().add(
+                DialogBox.getPuyoDialog(welcomeMessage, puyoImage)
+        );
+    }
+
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
@@ -48,5 +51,16 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getPuyoDialog(response, puyoImage)
         );
         userInput.clear();
+
+        if (input.trim().equalsIgnoreCase("bye")) {
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                javafx.application.Platform.exit();
+            });
+        }
     }
 }

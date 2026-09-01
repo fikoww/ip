@@ -1,8 +1,14 @@
 package puyo;
 
+import java.io.IOException;
+
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.layout.Region;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -16,19 +22,26 @@ import javafx.scene.layout.HBox;
  */
 public class DialogBox extends HBox {
 
+    @FXML
     private Label text;
+    @FXML
     private ImageView displayPicture;
 
-    public DialogBox(String s, Image img) {
-        text = new Label(s);
-        displayPicture = new ImageView(img);
+    private DialogBox(String text, Image img) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("/view/DialogBox.fxml"));
+            fxmlLoader.setController(this);
+            fxmlLoader.setRoot(this);
+            fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        text.setWrapText(true);
-        displayPicture.setFitWidth(100.0);
-        displayPicture.setFitHeight(100.0);
+        this.text.setText(text);
+        displayPicture.setImage(img);
 
-        this.setAlignment(Pos.TOP_RIGHT);
-        this.getChildren().addAll(text, displayPicture);
+        this.text.setMinHeight(Region.USE_PREF_SIZE);
+        this.setMinHeight(Region.USE_PREF_SIZE);
     }
 
     /**
