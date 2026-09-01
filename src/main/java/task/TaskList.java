@@ -1,6 +1,7 @@
 package puyo.task;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Represents a collection of tasks and provides operations to manipulate the list.
@@ -26,12 +27,31 @@ public class TaskList {
     }
 
     /**
-     * Adds a task to the list.
+     * Constructs a {@code TaskList} initialized with one or more tasks using varargs.
      *
-     * @param task The task to be added.
+     * @param tasks Tasks to initialize the list with.
+     */
+    public TaskList(Task... tasks) {
+        this.tasks = new ArrayList<>();
+        Collections.addAll(this.tasks, tasks);
+    }
+
+    /**
+     * Adds multiple tasks to the task list using varargs.
+     *
+     * @param tasks Tasks to be added to the list.
+     */
+    public void addTasks(Task... tasks) {
+        Collections.addAll(this.tasks, tasks);
+    }
+
+    /**
+     * Adds a single task to the task list.
+     *
+     * @param task Task to be added.
      */
     public void add(Task task) {
-        tasks.add(task);
+        this.tasks.add(task);
     }
 
     /**
