@@ -1,16 +1,17 @@
 package puyo;
 
+import java.io.File;
+
 import puyo.command.Command;
 import puyo.parser.Parser;
 import puyo.storage.Storage;
 import puyo.task.TaskList;
 import puyo.ui.Ui;
-import java.io.File;
 
 /**
  * Represents the main entry point and driver for the Puyo task management application.
  */
-public class Puyo {
+public class PuyoTest {
 
     private final Storage storage;
     private TaskList tasks;
@@ -21,7 +22,7 @@ public class Puyo {
      *
      * @param filePath The file path where task data is saved and loaded.
      */
-    public Puyo(String filePath) {
+    public PuyoTest(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         tasks = new TaskList(storage.load());

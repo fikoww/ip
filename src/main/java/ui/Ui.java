@@ -1,8 +1,9 @@
 package puyo.ui;
 
+import java.util.Scanner;
+
 import puyo.task.Task;
 import puyo.task.TaskList;
-import java.util.Scanner;
 
 /**
  * Handles user interface interactions, including reading inputs and displaying output messages.
@@ -12,12 +13,12 @@ public class Ui {
     private static final String LINE = "─".repeat(70);
     private static final String SOLID_LINE = "━".repeat(70);
     private static final String BANNER =
-                    "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n" +
-                    "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n" +
-                    "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n" +
-                    "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n" +
-                    "██║     ╚██████╔╝   ██║   ╚██████╔╝\n" +
-                    "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
+                    "██████╗ ██╗   ██╗██╗   ██╗ ██████╗\n"
+                  + "██╔══██╗██║   ██║╚██╗ ██╔╝██╔═══██╗\n"
+                  + "██████╔╝██║   ██║ ╚████╔╝ ██║   ██║\n"
+                  + "██╔═══╝ ██║   ██║  ╚██╔╝  ██║   ██║\n"
+                  + "██║     ╚██████╔╝   ██║   ╚██████╔╝\n"
+                  + "╚═╝      ╚═════╝    ╚═╝    ╚═════╝";
 
     private final Scanner scanner;
 

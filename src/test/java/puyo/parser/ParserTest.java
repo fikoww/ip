@@ -1,17 +1,28 @@
 package puyo.parser;
 
-import org.junit.jupiter.api.Test;
-import puyo.PuyoException;
-import puyo.command.*;
-
-import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.Test;
+
+import puyo.PuyoException;
+import puyo.command.AddCommand;
+import puyo.command.ByeCommand;
+import puyo.command.Command;
+import puyo.command.DeleteCommand;
+import puyo.command.ListCommand;
+import puyo.command.MarkCommand;
+import puyo.command.UnknownCommand;
+import puyo.command.UnmarkCommand;
+
+/**
+ * Tests for {@code Parser}.
+ */
 public class ParserTest {
 
     // -------------------------------------------------------------------------

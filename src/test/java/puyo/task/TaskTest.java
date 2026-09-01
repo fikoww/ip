@@ -1,13 +1,19 @@
 package puyo.task;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
+
+/**
+ * Tests for {@code Task}.
+ */
 public class TaskTest {
 
+    /**
+     * Dummy implementation of {@code Task} for testing purposes.
+     */
     private static class DummyTask extends Task {
         public DummyTask(String name) {
             super(name, TaskType.TODO);

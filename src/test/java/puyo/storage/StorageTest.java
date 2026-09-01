@@ -1,12 +1,8 @@
 package puyo.storage;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import puyo.task.Deadline;
-import puyo.task.Event;
-import puyo.task.Task;
-import puyo.task.TaskList;
-import puyo.task.ToDo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,10 +10,18 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import puyo.task.Deadline;
+import puyo.task.Event;
+import puyo.task.Task;
+import puyo.task.TaskList;
+import puyo.task.ToDo;
+
+/**
+ * Tests for {@code Storage}.
+ */
 public class StorageTest {
 
     @Test

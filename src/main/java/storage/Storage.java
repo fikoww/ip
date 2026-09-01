@@ -42,7 +42,8 @@ public class Storage {
     /**
      * Loads saved tasks from the local storage file.
      *
-     * @return An {@code ArrayList} of parsed {@code Task} objects, or an empty list if file doesn't exist.
+     * @return An {@code ArrayList} of parsed {@code Task} objects, or an empty list
+     *         if file doesn't exist.
      */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();

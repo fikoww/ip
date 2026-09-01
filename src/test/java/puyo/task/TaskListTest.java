@@ -1,20 +1,26 @@
 package puyo.task;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Tests for {@code TaskList}.
+ */
 public class TaskListTest {
 
     private TaskList taskList;
     private Task sampleTask;
 
+    /**
+     * Dummy implementation of {@code Task} for testing purposes.
+     */
     private static class DummyTask extends Task {
         public DummyTask(String name) {
             super(name, TaskType.TODO);

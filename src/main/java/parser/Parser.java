@@ -10,6 +10,7 @@ import puyo.command.AddCommand;
 import puyo.command.ByeCommand;
 import puyo.command.Command;
 import puyo.command.DeleteCommand;
+import puyo.command.FindCommand;
 import puyo.command.ListCommand;
 import puyo.command.MarkCommand;
 import puyo.command.UnknownCommand;
@@ -17,7 +18,6 @@ import puyo.command.UnmarkCommand;
 import puyo.task.Deadline;
 import puyo.task.Event;
 import puyo.task.ToDo;
-import puyo.command.FindCommand;
 
 /**
  * Parses user input strings into executable {@code Command} objects.
@@ -75,8 +75,8 @@ public class Parser {
     /**
      * Parses commands that require a single task index (mark/unmark).
      *
-     * @param type The command type string ("mark" or "unmark").
-     * @param input The full user input string.
+     * @param type   The command type string ("mark" or "unmark").
+     * @param input  The full user input string.
      * @param offset The character index offset to start parsing the task number.
      * @return The corresponding {@code MarkCommand} or {@code UnmarkCommand}.
      * @throws PuyoException If the index argument is invalid or missing.
@@ -187,7 +187,8 @@ public class Parser {
      * Parses a date or date-time string into a {@code LocalDateTime} object.
      *
      * @param raw The raw date string.
-     * @return Parsed {@code LocalDateTime} object, or {@code null} if parsing fails.
+     * @return Parsed {@code LocalDateTime} object, or {@code null} if parsing
+     *         fails.
      */
     public static LocalDateTime parseDateTime(String raw) {
         raw = raw.trim();

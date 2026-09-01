@@ -1,19 +1,23 @@
 package puyo.command;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
 import puyo.PuyoException;
 import puyo.storage.Storage;
 import puyo.task.TaskList;
 import puyo.task.ToDo;
 import puyo.ui.Ui;
 
-import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
+/**
+ * Tests for {@code AddCommand}.
+ */
 public class AddCommandTest {
 
     private TaskList tasks;
