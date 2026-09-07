@@ -42,14 +42,26 @@ public class MainWindow extends AnchorPane {
         );
     }
 
+    /**
+     * Adds multiple dialog boxes to the dialog container using varargs.
+     *
+     * @param dialogs Array or sequence of DialogBox nodes to add.
+     */
+    private void addDialogs(DialogBox... dialogs) {
+        dialogContainer.getChildren().addAll(dialogs);
+    }
+
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
         String response = puyo.getResponse(input);
-        dialogContainer.getChildren().addAll(
+
+        // Using varargs helper method to display user and puyo dialogs simultaneously
+        addDialogs(
                 DialogBox.getUserDialog(input, userImage),
                 DialogBox.getPuyoDialog(response, puyoImage)
         );
+
         userInput.clear();
 
         if (input.trim().equalsIgnoreCase("bye")) {
