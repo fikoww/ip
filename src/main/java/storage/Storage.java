@@ -27,6 +27,8 @@ public class Storage {
      * @param filePath The file path where tasks are stored.
      */
     public Storage(String filePath) {
+        assert filePath != null : "File path should not be null";
+        assert !filePath.trim().isEmpty() : "File path should not be empty";
         this.filePath = filePath;
     }
 
@@ -36,6 +38,7 @@ public class Storage {
      * @return The target storage file path string.
      */
     public String getFilePath() {
+        assert filePath != null : "File path should never be null";
         return filePath;
     }
 
@@ -61,11 +64,10 @@ public class Storage {
                     continue;
                 }
                 try {
-                    Task task = parseTaskFromLine(line);
+                    Task task = parseTaskFromLine(line, lineNum);
                     if (task != null) {
+                        assert task != null : "Parsed task should not be null before adding to list";
                         tasks.add(task);
-                    } else {
-                        System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
                     }
                 } catch (Exception e) {
                     System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
@@ -74,6 +76,8 @@ public class Storage {
         } catch (IOException e) {
             System.out.println(" [Warning] Could not load tasks: " + e.getMessage());
         }
+
+        assert tasks != null : "Loaded tasks list should never be null";
         return tasks;
     }
 
@@ -81,11 +85,14 @@ public class Storage {
      * Parses a single formatted line from the storage file into a {@code Task}.
      *
      * @param line Raw line read from file.
+     * @param lineNum Current line number for warning context.
      * @return The parsed {@code Task}, or {@code null} if formatted incorrectly.
      */
-    private Task parseTaskFromLine(String line) {
+    private Task parseTaskFromLine(String line, int lineNum) {
+        assert line != null : "Line to parse should not be null";
         String[] parts = line.split(" \\| ");
         if (parts.length < 3) {
+            System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
             return null;
         }
 
@@ -93,7 +100,7 @@ public class Storage {
         boolean done = parts[1].trim().equals("1");
         String name = parts[2].trim();
 
-        Task task = createSpecificTask(type, parts, name);
+        Task task = createSpecificTask(type, parts, lineNum, name);
         if (task == null) {
             return null;
         }
@@ -107,24 +114,35 @@ public class Storage {
     /**
      * Factory method to instantiate specific Task subclasses depending on type code.
      */
-    private Task createSpecificTask(String type, String[] parts, String name) {
+    private Task createSpecificTask(String type, String[] parts, int lineNum, String name) {
         switch (type) {
             case "T":
                 return new ToDo(name);
             case "D":
                 if (parts.length < 4) {
+                    System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum);
                     return null;
                 }
                 LocalDateTime by = Parser.parseDateTime(parts[3].trim());
-                return (by != null) ? new Deadline(name, by) : null;
+                if (by == null) {
+                    System.out.println(" [Warning] Skipping corrupted deadline date at line " + lineNum);
+                    return null;
+                }
+                return new Deadline(name, by);
             case "E":
                 if (parts.length < 5) {
+                    System.out.println(" [Warning] Skipping corrupted event at line " + lineNum);
                     return null;
                 }
                 LocalDateTime start = Parser.parseDateTime(parts[3].trim());
                 LocalDateTime end = Parser.parseDateTime(parts[4].trim());
-                return (start != null && end != null) ? new Event(name, start, end) : null;
+                if (start == null || end == null) {
+                    System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum);
+                    return null;
+                }
+                return new Event(name, start, end);
             default:
+                System.out.println(" [Warning] Skipping unknown task type at line " + lineNum);
                 return null;
         }
     }
@@ -135,12 +153,20 @@ public class Storage {
      * @param tasks The {@code TaskList} containing tasks to save.
      */
     public void save(TaskList tasks) {
+        assert tasks != null : "TaskList to save should not be null";
+
         try {
             File file = new File(filePath);
-            file.getParentFile().mkdirs();
+            File parentDir = file.getParentFile();
+            if (parentDir != null) {
+                parentDir.mkdirs();
+            }
+
             FileWriter fw = new FileWriter(file);
             for (int i = 0; i < tasks.size(); i++) {
-                fw.write(tasks.get(i).toFileString() + "\n");
+                Task task = tasks.get(i);
+                assert task != null : "Task to save should not be null";
+                fw.write(task.toFileString() + "\n");
             }
             fw.close();
         } catch (IOException e) {

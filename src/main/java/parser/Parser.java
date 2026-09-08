@@ -44,10 +44,16 @@ public class Parser {
      * @throws PuyoException If the input format is invalid or empty.
      */
     public static Command parse(String input) throws PuyoException {
+        assert input != null : "Input string to parse should not be null";
+
         if (input.isBlank()) {
             throw new PuyoException("Please enter a non-empty valid command!");
         }
-        String firstWord = input.split(" ")[0].toLowerCase();
+
+        String[] parts = input.split(" ");
+        assert parts.length > 0 : "Split string array should contain at least one element";
+
+        String firstWord = parts[0].toLowerCase();
         switch (firstWord) {
             case "bye":
                 return new ByeCommand();
@@ -82,6 +88,9 @@ public class Parser {
      * @throws PuyoException If the index argument is invalid or missing.
      */
     private static Command parseIndexCommand(String type, String input, int offset) throws PuyoException {
+        assert type.equals("mark") || type.equals("unmark") : "Command type must be mark or unmark";
+        assert offset > 0 : "Offset must be positive";
+
         try {
             int index = Integer.parseInt(input.substring(offset).trim()) - 1;
             return type.equals("mark") ? new MarkCommand(index) : new UnmarkCommand(index);
@@ -98,6 +107,8 @@ public class Parser {
      * @throws PuyoException If the index argument is invalid or missing.
      */
     private static Command parseDeleteCommand(String input) throws PuyoException {
+        assert input.toLowerCase().startsWith("delete") : "Input should start with 'delete'";
+
         try {
             int index = Integer.parseInt(input.substring(7).trim()) - 1;
             return new DeleteCommand(index);
@@ -114,6 +125,8 @@ public class Parser {
      * @throws PuyoException If the description is empty.
      */
     private static Command parseTodoCommand(String input) throws PuyoException {
+        assert input.toLowerCase().startsWith("todo") : "Input should start with 'todo'";
+
         String desc = input.substring(4).trim();
         if (desc.isEmpty()) {
             throw new PuyoException("The description of a todo can't be empty!");
@@ -129,6 +142,8 @@ public class Parser {
      * @throws PuyoException If the arguments or date format are invalid.
      */
     private static Command parseDeadlineCommand(String input) throws PuyoException {
+        assert input.toLowerCase().startsWith("deadline") : "Input should start with 'deadline'";
+
         if (!input.toLowerCase().contains("/by")) {
             throw new PuyoException("Please enter a valid deadline by using '/by'!");
         }
@@ -153,6 +168,8 @@ public class Parser {
      * @throws PuyoException If the arguments or date formats are invalid.
      */
     private static Command parseEventCommand(String input) throws PuyoException {
+        assert input.toLowerCase().startsWith("event") : "Input should start with 'event'";
+
         String lower = input.toLowerCase();
         int fromIndex = lower.indexOf("/from");
         int toIndex = lower.indexOf("/to");
@@ -194,6 +211,8 @@ public class Parser {
      *         fails.
      */
     public static LocalDateTime parseDateTime(String raw) {
+        assert raw != null : "Raw date string to parse should not be null";
+
         raw = raw.trim();
         try {
             return LocalDateTime.parse(raw, INPUT_DATETIME);
@@ -214,6 +233,8 @@ public class Parser {
      * @throws PuyoException If the search keyword is empty.
      */
     private static Command parseFindCommand(String input) throws PuyoException {
+        assert input.toLowerCase().startsWith("find") : "Input should start with 'find'";
+
         String keyword = input.substring(4).trim();
         if (keyword.isEmpty()) {
             throw new PuyoException("The search keyword cannot be empty!");

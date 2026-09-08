@@ -23,6 +23,7 @@ public class TaskList {
      * @param tasks The initial list of tasks.
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Initial task list should not be null";
         this.tasks = tasks;
     }
 
@@ -32,6 +33,7 @@ public class TaskList {
      * @param tasks Tasks to initialize the list with.
      */
     public TaskList(Task... tasks) {
+        assert tasks != null : "Task varargs array should not be null";
         this.tasks = new ArrayList<>();
         Collections.addAll(this.tasks, tasks);
     }
@@ -42,6 +44,7 @@ public class TaskList {
      * @param tasks Tasks to be added to the list.
      */
     public void addTasks(Task... tasks) {
+        assert tasks != null : "Tasks to add should not be null";
         Collections.addAll(this.tasks, tasks);
     }
 
@@ -51,6 +54,7 @@ public class TaskList {
      * @param task Task to be added.
      */
     public void add(Task task) {
+        assert task != null : "Task to add should not be null";
         this.tasks.add(task);
     }
 
@@ -72,6 +76,7 @@ public class TaskList {
      * @throws IndexOutOfBoundsException If the index is out of bounds.
      */
     public Task remove(int index) {
+        assert index >= 0 && index < tasks.size() : "Index to remove out of bounds: " + index;
         if (!isValidIndex(index)) {
             throw new IndexOutOfBoundsException("Task index out of bounds: " + index);
         }
@@ -86,6 +91,7 @@ public class TaskList {
      * @throws IndexOutOfBoundsException If the index is out of bounds.
      */
     public Task get(int index) {
+        assert index >= 0 && index < tasks.size() : "Index to get out of bounds: " + index;
         if (!isValidIndex(index)) {
             throw new IndexOutOfBoundsException("Task index out of bounds: " + index);
         }
@@ -116,6 +122,7 @@ public class TaskList {
      * @return An {@code ArrayList} containing all tasks.
      */
     public ArrayList<Task> getTasks() {
+        assert tasks != null : "Internal tasks list should never be null";
         return tasks;
     }
 
@@ -126,9 +133,11 @@ public class TaskList {
      * @return A new {@code TaskList} containing matching tasks.
      */
     public TaskList findTasks(String keyword) {
+        assert keyword != null : "Search keyword should not be null";
         TaskList matching = new TaskList();
         String lowerKeyword = keyword.toLowerCase();
         for (Task task : tasks) {
+            assert task != null : "Tasks in list should not be null";
             if (task.getName().toLowerCase().contains(lowerKeyword)) {
                 matching.add(task);
             }
