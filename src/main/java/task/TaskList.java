@@ -109,11 +109,9 @@ public class TaskList {
      */
     public TaskList findTasks(String keyword) {
         TaskList matching = new TaskList();
-        for (Task task : tasks) {
-            if (task.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                matching.add(task);
-            }
-        }
+        tasks.stream()
+                .filter(task -> task.getName().toLowerCase().contains(keyword.toLowerCase()))
+                .forEach(matching::add);
         return matching;
     }
 }
