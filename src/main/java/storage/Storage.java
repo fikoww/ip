@@ -128,9 +128,7 @@ public class Storage {
      *
      * @param tasks The {@code TaskList} containing tasks to save.
      */
-    public void save(TaskList tasks) {
-        assert tasks != null : "TaskList to save should not be null";
-
+   public void save(TaskList tasks) {
         try {
             File file = new File(filePath);
             File parentDir = file.getParentFile();
@@ -139,13 +137,17 @@ public class Storage {
             }
 
             FileWriter fw = new FileWriter(file);
-            for (int i = 0; i < tasks.size(); i++) {
-                Task task = tasks.get(i);
-                assert task != null : "Task to save should not be null";
-                fw.write(task.toFileString() + "\n");
-            }
+            tasks.getTasks().stream()
+                    .map(Task::toFileString)
+                    .forEach(line -> {
+                        try {
+                            fw.write(line + "\n");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
             fw.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(" [Warning] Could not save tasks: " + e.getMessage());
         }
     }

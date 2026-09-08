@@ -115,14 +115,10 @@ public class TaskList {
      * @return A new {@code TaskList} containing matching tasks.
      */
     public TaskList findTasks(String keyword) {
-        assert keyword != null : "Search keyword should not be null";
         TaskList matching = new TaskList();
-        for (Task task : tasks) {
-            assert task != null : "Tasks in list should not be null";
-            if (task.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                matching.add(task);
-            }
-        }
+        tasks.stream()
+                .filter(task -> task.getName().toLowerCase().contains(keyword.toLowerCase()))
+                .forEach(matching::add);
         return matching;
     }
 }
