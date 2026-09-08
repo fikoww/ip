@@ -55,12 +55,26 @@ public class TaskList {
     }
 
     /**
+     * Checks if the given index is within valid bounds of the task list.
+     *
+     * @param index The zero-based index to check.
+     * @return {@code true} if index is valid, {@code false} otherwise.
+     */
+    public boolean isValidIndex(int index) {
+        return index >= 0 && index < tasks.size();
+    }
+
+    /**
      * Removes and returns the task at the specified index.
      *
      * @param index The zero-based index of the task to be removed.
      * @return The removed {@code Task}.
+     * @throws IndexOutOfBoundsException If the index is out of bounds.
      */
     public Task remove(int index) {
+        if (!isValidIndex(index)) {
+            throw new IndexOutOfBoundsException("Task index out of bounds: " + index);
+        }
         return tasks.remove(index);
     }
 
@@ -69,8 +83,12 @@ public class TaskList {
      *
      * @param index The zero-based index of the task to retrieve.
      * @return The {@code Task} at the specified index.
+     * @throws IndexOutOfBoundsException If the index is out of bounds.
      */
     public Task get(int index) {
+        if (!isValidIndex(index)) {
+            throw new IndexOutOfBoundsException("Task index out of bounds: " + index);
+        }
         return tasks.get(index);
     }
 
@@ -109,8 +127,9 @@ public class TaskList {
      */
     public TaskList findTasks(String keyword) {
         TaskList matching = new TaskList();
+        String lowerKeyword = keyword.toLowerCase();
         for (Task task : tasks) {
-            if (task.getName().toLowerCase().contains(keyword.toLowerCase())) {
+            if (task.getName().toLowerCase().contains(lowerKeyword)) {
                 matching.add(task);
             }
         }
