@@ -61,52 +61,12 @@ public class Storage {
                     continue;
                 }
                 try {
-                    String[] parts = line.split(" \\| ");
-                    if (parts.length < 3) {
+                    Task task = parseTaskFromLine(line);
+                    if (task != null) {
+                        tasks.add(task);
+                    } else {
                         System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
-                        continue;
                     }
-                    String type = parts[0].trim();
-                    boolean done = parts[1].trim().equals("1");
-                    String name = parts[2].trim();
-                    Task task;
-                    switch (type) {
-                        case "T":
-                            task = new ToDo(name);
-                            break;
-                        case "D":
-                            if (parts.length < 4) {
-                                System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum);
-                                continue;
-                            }
-                            LocalDateTime by = Parser.parseDateTime(parts[3].trim());
-                            if (by == null) {
-                                System.out.println(" [Warning] Skipping corrupted deadline date at line " + lineNum);
-                                continue;
-                            }
-                            task = new Deadline(name, by);
-                            break;
-                        case "E":
-                            if (parts.length < 5) {
-                                System.out.println(" [Warning] Skipping corrupted event at line " + lineNum);
-                                continue;
-                            }
-                            LocalDateTime start = Parser.parseDateTime(parts[3].trim());
-                            LocalDateTime end = Parser.parseDateTime(parts[4].trim());
-                            if (start == null || end == null) {
-                                System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum);
-                                continue;
-                            }
-                            task = new Event(name, start, end);
-                            break;
-                        default:
-                            System.out.println(" [Warning] Skipping unknown task type at line " + lineNum);
-                            continue;
-                    }
-                    if (done) {
-                        task.markDone();
-                    }
-                    tasks.add(task);
                 } catch (Exception e) {
                     System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
                 }
@@ -115,6 +75,58 @@ public class Storage {
             System.out.println(" [Warning] Could not load tasks: " + e.getMessage());
         }
         return tasks;
+    }
+
+    /**
+     * Parses a single formatted line from the storage file into a {@code Task}.
+     *
+     * @param line Raw line read from file.
+     * @return The parsed {@code Task}, or {@code null} if formatted incorrectly.
+     */
+    private Task parseTaskFromLine(String line) {
+        String[] parts = line.split(" \\| ");
+        if (parts.length < 3) {
+            return null;
+        }
+
+        String type = parts[0].trim();
+        boolean done = parts[1].trim().equals("1");
+        String name = parts[2].trim();
+
+        Task task = createSpecificTask(type, parts, name);
+        if (task == null) {
+            return null;
+        }
+
+        if (done) {
+            task.markDone();
+        }
+        return task;
+    }
+
+    /**
+     * Factory method to instantiate specific Task subclasses depending on type code.
+     */
+    private Task createSpecificTask(String type, String[] parts, String name) {
+        switch (type) {
+            case "T":
+                return new ToDo(name);
+            case "D":
+                if (parts.length < 4) {
+                    return null;
+                }
+                LocalDateTime by = Parser.parseDateTime(parts[3].trim());
+                return (by != null) ? new Deadline(name, by) : null;
+            case "E":
+                if (parts.length < 5) {
+                    return null;
+                }
+                LocalDateTime start = Parser.parseDateTime(parts[3].trim());
+                LocalDateTime end = Parser.parseDateTime(parts[4].trim());
+                return (start != null && end != null) ? new Event(name, start, end) : null;
+            default:
+                return null;
+        }
     }
 
     /**
