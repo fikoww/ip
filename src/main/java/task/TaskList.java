@@ -23,6 +23,7 @@ public class TaskList {
      * @param tasks The initial list of tasks.
      */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "Initial task list should not be null";
         this.tasks = tasks;
     }
 
@@ -32,6 +33,7 @@ public class TaskList {
      * @param tasks Tasks to initialize the list with.
      */
     public TaskList(Task... tasks) {
+        assert tasks != null : "Task varargs array should not be null";
         this.tasks = new ArrayList<>();
         Collections.addAll(this.tasks, tasks);
     }
@@ -42,6 +44,7 @@ public class TaskList {
      * @param tasks Tasks to be added to the list.
      */
     public void addTasks(Task... tasks) {
+        assert tasks != null : "Tasks to add should not be null";
         Collections.addAll(this.tasks, tasks);
     }
 
@@ -51,6 +54,7 @@ public class TaskList {
      * @param task Task to be added.
      */
     public void add(Task task) {
+        assert task != null : "Task to add should not be null";
         this.tasks.add(task);
     }
 
@@ -61,6 +65,7 @@ public class TaskList {
      * @return The removed {@code Task}.
      */
     public Task remove(int index) {
+        assert index >= 0 && index < tasks.size() : "Index to remove out of bounds: " + index;
         return tasks.remove(index);
     }
 
@@ -71,6 +76,7 @@ public class TaskList {
      * @return The {@code Task} at the specified index.
      */
     public Task get(int index) {
+        assert index >= 0 && index < tasks.size() : "Index to get out of bounds: " + index;
         return tasks.get(index);
     }
 
@@ -98,6 +104,7 @@ public class TaskList {
      * @return An {@code ArrayList} containing all tasks.
      */
     public ArrayList<Task> getTasks() {
+        assert tasks != null : "Internal tasks list should never be null";
         return tasks;
     }
 
