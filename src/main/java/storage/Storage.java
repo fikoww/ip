@@ -27,6 +27,8 @@ public class Storage {
      * @param filePath The file path where tasks are stored.
      */
     public Storage(String filePath) {
+        assert filePath != null : "File path should not be null";
+        assert !filePath.trim().isEmpty() : "File path should not be empty";
         this.filePath = filePath;
     }
 
@@ -36,6 +38,7 @@ public class Storage {
      * @return The target storage file path string.
      */
     public String getFilePath() {
+        assert filePath != null : "File path should never be null";
         return filePath;
     }
 
@@ -106,6 +109,7 @@ public class Storage {
                     if (done) {
                         task.markDone();
                     }
+                    assert task != null : "Parsed task should not be null before adding to list";
                     tasks.add(task);
                 } catch (Exception e) {
                     System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
@@ -114,6 +118,8 @@ public class Storage {
         } catch (IOException e) {
             System.out.println(" [Warning] Could not load tasks: " + e.getMessage());
         }
+
+        assert tasks != null : "Loaded tasks list should never be null";
         return tasks;
     }
 
@@ -123,12 +129,20 @@ public class Storage {
      * @param tasks The {@code TaskList} containing tasks to save.
      */
     public void save(TaskList tasks) {
+        assert tasks != null : "TaskList to save should not be null";
+
         try {
             File file = new File(filePath);
-            file.getParentFile().mkdirs();
+            File parentDir = file.getParentFile();
+            if (parentDir != null) {
+                parentDir.mkdirs();
+            }
+
             FileWriter fw = new FileWriter(file);
             for (int i = 0; i < tasks.size(); i++) {
-                fw.write(tasks.get(i).toFileString() + "\n");
+                Task task = tasks.get(i);
+                assert task != null : "Task to save should not be null";
+                fw.write(task.toFileString() + "\n");
             }
             fw.close();
         } catch (IOException e) {
