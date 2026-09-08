@@ -64,53 +64,11 @@ public class Storage {
                     continue;
                 }
                 try {
-                    String[] parts = line.split(" \\| ");
-                    if (parts.length < 3) {
-                        System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
-                        continue;
+                    Task task = parseTaskFromLine(line, lineNum);
+                    if (task != null) {
+                        assert task != null : "Parsed task should not be null before adding to list";
+                        tasks.add(task);
                     }
-                    String type = parts[0].trim();
-                    boolean done = parts[1].trim().equals("1");
-                    String name = parts[2].trim();
-                    Task task;
-                    switch (type) {
-                        case "T":
-                            task = new ToDo(name);
-                            break;
-                        case "D":
-                            if (parts.length < 4) {
-                                System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum);
-                                continue;
-                            }
-                            LocalDateTime by = Parser.parseDateTime(parts[3].trim());
-                            if (by == null) {
-                                System.out.println(" [Warning] Skipping corrupted deadline date at line " + lineNum);
-                                continue;
-                            }
-                            task = new Deadline(name, by);
-                            break;
-                        case "E":
-                            if (parts.length < 5) {
-                                System.out.println(" [Warning] Skipping corrupted event at line " + lineNum);
-                                continue;
-                            }
-                            LocalDateTime start = Parser.parseDateTime(parts[3].trim());
-                            LocalDateTime end = Parser.parseDateTime(parts[4].trim());
-                            if (start == null || end == null) {
-                                System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum);
-                                continue;
-                            }
-                            task = new Event(name, start, end);
-                            break;
-                        default:
-                            System.out.println(" [Warning] Skipping unknown task type at line " + lineNum);
-                            continue;
-                    }
-                    if (done) {
-                        task.markDone();
-                    }
-                    assert task != null : "Parsed task should not be null before adding to list";
-                    tasks.add(task);
                 } catch (Exception e) {
                     System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
                 }
@@ -121,6 +79,72 @@ public class Storage {
 
         assert tasks != null : "Loaded tasks list should never be null";
         return tasks;
+    }
+
+    /**
+     * Parses a single formatted line from the storage file into a {@code Task}.
+     *
+     * @param line Raw line read from file.
+     * @param lineNum Current line number for warning context.
+     * @return The parsed {@code Task}, or {@code null} if formatted incorrectly.
+     */
+    private Task parseTaskFromLine(String line, int lineNum) {
+        assert line != null : "Line to parse should not be null";
+        String[] parts = line.split(" \\| ");
+        if (parts.length < 3) {
+            System.out.println(" [Warning] Skipping corrupted line " + lineNum + ": " + line);
+            return null;
+        }
+
+        String type = parts[0].trim();
+        boolean done = parts[1].trim().equals("1");
+        String name = parts[2].trim();
+
+        Task task = createSpecificTask(type, parts, lineNum, name);
+        if (task == null) {
+            return null;
+        }
+
+        if (done) {
+            task.markDone();
+        }
+        return task;
+    }
+
+    /**
+     * Factory method to instantiate specific Task subclasses depending on type code.
+     */
+    private Task createSpecificTask(String type, String[] parts, int lineNum, String name) {
+        switch (type) {
+            case "T":
+                return new ToDo(name);
+            case "D":
+                if (parts.length < 4) {
+                    System.out.println(" [Warning] Skipping corrupted deadline at line " + lineNum);
+                    return null;
+                }
+                LocalDateTime by = Parser.parseDateTime(parts[3].trim());
+                if (by == null) {
+                    System.out.println(" [Warning] Skipping corrupted deadline date at line " + lineNum);
+                    return null;
+                }
+                return new Deadline(name, by);
+            case "E":
+                if (parts.length < 5) {
+                    System.out.println(" [Warning] Skipping corrupted event at line " + lineNum);
+                    return null;
+                }
+                LocalDateTime start = Parser.parseDateTime(parts[3].trim());
+                LocalDateTime end = Parser.parseDateTime(parts[4].trim());
+                if (start == null || end == null) {
+                    System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum);
+                    return null;
+                }
+                return new Event(name, start, end);
+            default:
+                System.out.println(" [Warning] Skipping unknown task type at line " + lineNum);
+                return null;
+        }
     }
 
     /**

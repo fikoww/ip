@@ -171,32 +171,35 @@ public class Parser {
         assert input.toLowerCase().startsWith("event") : "Input should start with 'event'";
 
         String lower = input.toLowerCase();
-        boolean hasFrom = lower.contains("/from");
-        boolean hasTo = lower.contains("/to");
-        if (!hasFrom && !hasTo) {
+        int fromIndex = lower.indexOf("/from");
+        int toIndex = lower.indexOf("/to");
+
+        if (fromIndex == -1 || toIndex == -1) {
             throw new PuyoException("Please enter a valid event timing by using '/from' and '/to'!");
-        } else if (!hasFrom) {
-            throw new PuyoException("Please enter a valid starting event timing by using '/from'!");
-        } else if (!hasTo) {
-            throw new PuyoException("Please enter a valid ending event timing by using '/to'!");
-        } else if (lower.indexOf("/from") > lower.indexOf("/to")) {
+        }
+        if (fromIndex > toIndex) {
             throw new PuyoException("Please enter a valid event timing by putting '/from' before '/to'!");
         }
+
         String[] parts = input.substring(6).split("/from|/to");
         if (parts.length < 3) {
             throw new PuyoException("Event description, '/from', or '/to' cannot be empty!");
         }
+
         String name = parts[0].trim();
         String from = parts[1].trim();
         String to = parts[2].trim();
+
         if (name.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new PuyoException("Event description, '/from', or '/to' cannot be empty!");
         }
+
         LocalDateTime fromDT = parseDateTime(from);
         LocalDateTime toDT = parseDateTime(to);
         if (fromDT == null || toDT == null) {
             throw new PuyoException("Invalid date format! Use: yyyy-MM-dd or yyyy-MM-dd HHmm (e.g. 2019-12-02 1800)");
         }
+
         return new AddCommand(new Event(name, fromDT, toDT));
     }
 
