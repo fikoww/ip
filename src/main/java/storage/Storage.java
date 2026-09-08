@@ -152,7 +152,7 @@ public class Storage {
      *
      * @param tasks The {@code TaskList} containing tasks to save.
      */
-   public void save(TaskList tasks) {
+    public void save(TaskList tasks) {
         try {
             File file = new File(filePath);
             File parentDir = file.getParentFile();

@@ -1,6 +1,5 @@
 package puyo;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -27,10 +26,18 @@ public class MainWindow extends AnchorPane {
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/user.png"));
     private Image puyoImage = new Image(this.getClass().getResourceAsStream("/images/puyo.png"));
 
+    /**
+     * Sets the Puyo instance for the controller.
+     *
+     * @param puyo The Puyo instance to be set.
+     */
     public void setPuyo(Puyo puyo) {
         this.puyo = puyo;
     }
 
+    /**
+     * Initializes the scroll pane and displays the welcome message.
+     */
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
@@ -51,6 +58,10 @@ public class MainWindow extends AnchorPane {
         dialogContainer.getChildren().addAll(dialogs);
     }
 
+    /**
+     * Creates two dialog boxes, one echoing user input and the other containing Puyo's reply.
+     * Clears the user input after processing.
+     */
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();

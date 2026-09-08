@@ -76,10 +76,14 @@ public class TaskList {
      * @throws IndexOutOfBoundsException If the index is out of bounds.
      */
     public Task remove(int index) {
-        assert index >= 0 && index < tasks.size() : "Index to remove out of bounds: " + index;
-        if (!isValidIndex(index)) {
-            throw new IndexOutOfBoundsException("Task index out of bounds: " + index);
+        // 1. Throw the runtime exception first so the JUnit test passes
+        if (index < 0 || index >= tasks.size()) {
+            throw new IndexOutOfBoundsException("Index to remove out of bounds: " + index);
         }
+
+        // 2. Use assert as an internal invariant check afterward
+        assert tasks.get(index) != null : "Task at index should not be null";
+
         return tasks.remove(index);
     }
 
