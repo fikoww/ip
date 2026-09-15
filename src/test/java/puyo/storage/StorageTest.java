@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import puyo.PuyoException;
 import puyo.task.Deadline;
 import puyo.task.Event;
 import puyo.task.Task;
@@ -34,7 +35,7 @@ public class StorageTest {
     }
 
     @Test
-    public void saveAndLoad_validTasks_persistsDataCorrectly(@TempDir Path tempDir) {
+    public void saveAndLoad_validTasks_persistsDataCorrectly(@TempDir Path tempDir) throws PuyoException {
         Path filePath = tempDir.resolve("data/tasks.txt");
         Storage storage = new Storage(filePath.toString());
 
@@ -50,10 +51,8 @@ public class StorageTest {
         taskList.add(deadline);
         taskList.add(event);
 
-        // Save ke storage
         storage.save(taskList);
 
-        // Load kembali dari file yang baru disimpan
         ArrayList<Task> loadedTasks = storage.load();
 
         assertEquals(3, loadedTasks.size());
@@ -70,7 +69,6 @@ public class StorageTest {
     public void load_corruptedLinesInFile_skipsCorruptedLines(@TempDir Path tempDir) throws IOException {
         Path filePath = tempDir.resolve("corrupted.txt");
 
-        // Buat file isi gabungan baris valid dan baris korup/rusak
         try (FileWriter writer = new FileWriter(filePath.toFile())) {
             writer.write("T | 1 | valid todo\n");
             writer.write("INVALID LINE FORMAT\n");
@@ -82,7 +80,6 @@ public class StorageTest {
         Storage storage = new Storage(filePath.toString());
         ArrayList<Task> tasks = storage.load();
 
-        // Hanya 2 baris ToDo valid yang harus berhasil di-load
         assertEquals(2, tasks.size());
         assertEquals("valid todo", tasks.get(0).getName());
         assertEquals("another valid todo", tasks.get(1).getName());
