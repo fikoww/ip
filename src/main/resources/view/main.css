@@ -1,6 +1,9 @@
 /* Application Main Root Background */
 .root {
     -fx-background-color: #282a36;
+    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-size: 13pt;
+    -fx-font-smoothing-type: lcd;
 }
 
 /* ScrollPane Configuration */
@@ -56,9 +59,10 @@
 
 /* Generic Dialog Label Base */
 .label {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #f8f8f2;
+    -fx-font-size: 13pt;
+    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-smoothing-type: lcd;
 }
 
 /* User Speech Bubble Style */
@@ -75,4 +79,8 @@
     -fx-text-fill: #f8f8f2;
     -fx-background-radius: 15px 15px 15px 0px;
     -fx-padding: 10px 14px;
+}
+
+.dialog-box {
+    -fx-font-family: "Segoe UI", sans-serif;
 }
