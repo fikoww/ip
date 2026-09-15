@@ -42,7 +42,6 @@ public class MainWindow extends AnchorPane {
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
 
-        // Welcome message dari Puyo
         String welcomeMessage = "Hello! I'm Puyo!\nWhat can I do for you today?";
         dialogContainer.getChildren().add(
                 DialogBox.getPuyoDialog(welcomeMessage, puyoImage)
