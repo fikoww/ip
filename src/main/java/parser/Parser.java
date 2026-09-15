@@ -73,6 +73,8 @@ public class Parser {
                 return parseEventCommand(input);
             case "find":
                 return parseFindCommand(input);
+            case "viewschedule":
+                return parseViewScheduleCommand(input);
             default:
                 return new UnknownCommand();
         }
@@ -240,5 +242,27 @@ public class Parser {
             throw new PuyoException("The search keyword cannot be empty!");
         }
         return new FindCommand(keyword);
+    }
+
+    /**
+     * Parses a view schedule command input string.
+     *
+     * @param input The full user input string.
+     * @return A {@code ViewScheduleCommand} object.
+     * @throws PuyoException If the date format is invalid or missing.
+     */
+    private static Command parseViewScheduleCommand(String input) throws PuyoException {
+        try {
+            // Split input by whitespace into at most 2 parts: ["viewschedule", "2026-09-03"]
+            String[] parts = input.split("\\s+", 2);
+            if (parts.length < 2 || parts[1].trim().isEmpty()) {
+                throw new PuyoException("Please provide a valid date! Format: viewschedule YYYY-MM-DD");
+            }
+            String dateString = parts[1].trim();
+            LocalDate date = LocalDate.parse(dateString);
+            return new puyo.command.ViewScheduleCommand(date);
+        } catch (Exception e) {
+            throw new PuyoException("Please provide a valid date! Format: viewschedule YYYY-MM-DD");
+        }
     }
 }
