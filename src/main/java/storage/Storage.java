@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import puyo.PuyoException;
 import puyo.parser.Parser;
 import puyo.task.Deadline;
 import puyo.task.Event;
@@ -140,7 +141,12 @@ public class Storage {
                     System.out.println(" [Warning] Skipping corrupted event date at line " + lineNum);
                     return null;
                 }
-                return new Event(name, start, end);
+                try {
+                    return new Event(name, start, end);
+                } catch (PuyoException e) {
+                    System.out.println(" [Warning] Skipping invalid event time at line " + lineNum + ": " + e.getMessage());
+                    return null;
+                }
             default:
                 System.out.println(" [Warning] Skipping unknown task type at line " + lineNum);
                 return null;

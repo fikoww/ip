@@ -2,6 +2,7 @@ package puyo.task;
 
 import java.time.LocalDateTime;
 
+import puyo.PuyoException;
 import puyo.parser.Parser;
 
 /**
@@ -14,13 +15,21 @@ public class Event extends Task {
 
     /**
      * Constructs an {@code Event} task with the specified description, start time, and end time.
+     * Enforces validation to ensure the start time is strictly before the end time.
      *
      * @param description The detailed description of the event.
      * @param start The starting date and time of the event.
      * @param end The ending date and time of the event.
+     * @throws PuyoException If the start time is after or equal to the end time.
      */
-    public Event(String description, LocalDateTime start, LocalDateTime end) {
-        super(description, TaskType.EVENT);
+    public Event(String description, LocalDateTime start, LocalDateTime end) throws PuyoException {
+        super(description, TaskType.EVENT); // Passes both required arguments to the parent Task constructor
+
+        // Validate that the start time is strictly before the end time
+        if (start.isAfter(end) || start.isEqual(end)) {
+            throw new PuyoException("Oops! Start time cannot be after or equal to end time.");
+        }
+
         this.start = start;
         this.end = end;
     }
