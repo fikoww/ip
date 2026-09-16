@@ -1,5 +1,7 @@
 package puyo.task;
 
+import java.time.LocalDate;
+
 /**
  * Represents an abstract task managed by the application.
  */
@@ -51,6 +53,18 @@ public abstract class Task {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Returns whether this task is scheduled on the given date.
+     * Tasks without a date, such as todos, do not appear in a daily schedule.
+     * Implemented with assistance from ChatGPT.
+     *
+     * @param date The date to check.
+     * @return {@code false} unless a dated task overrides this method.
+     */
+    public boolean isScheduledOn(LocalDate date) {
+        return false;
     }
 
     /**
