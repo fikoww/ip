@@ -1,138 +1,92 @@
 # Puyo
 
-Puyo is a penguin-themed desktop task manager built with Java and JavaFX. Type commands in its chat interface to keep track of things to do, deadlines, and events.
+Puyo is a penguin-themed desktop task manager built with Java and JavaFX. Type commands in its chat interface to keep track of tasks, deadlines, and events.
 
 This repository contains my CS2103T individual project (iP).
 
 ## Features
 
 - Add todos, deadlines, and events.
-- View all tasks and mark them as completed or incomplete.
-- Search task descriptions by keyword.
+- List tasks and mark them as completed or incomplete.
+- Find tasks by a keyword in their description.
+- View deadlines and events for a particular date, including multi-day events.
 - Delete tasks you no longer need.
-- Query schedules for a date with `viewschedule`.
-- Save tasks locally and load them when the application starts.
+- Save tasks locally and load them when Puyo starts.
 
-## Getting started
+## Using Puyo
 
-Puyo requires **Java 25**. To build the application from source, install a **JDK 25** and download or clone this repository.
+1. Install **Java 25** and check that `java -version` reports version 25.
+2. Download `puyo.jar` from the [latest release](https://github.com/fikoww/ip/releases/latest).
+3. Put the JAR in a folder where you want to keep your tasks. Open a terminal in that folder and run:
 
-Open a terminal in the project folder and check the Java version:
+   ```bash
+   java -jar puyo.jar
+   ```
+
+Enter `todo read chapter 6`, then `list` to see your first task. Press Enter or click **Send** after each command.
+
+See the [User Guide](docs/README.md) for all commands, date formats, examples, and troubleshooting. Puyo saves tasks to `data/puyo.txt` relative to the folder from which it is launched; use the same folder each time to load the same tasks.
+
+## Building from source
+
+Use **JDK 25**. Clone or download this repository and open a terminal in its root folder. The included Gradle wrapper downloads Gradle and dependencies on the first build, so an internet connection is required for that build.
+
+On Windows PowerShell:
+
+```powershell
+java -version
+.\gradlew.bat run
+```
+
+On macOS or Linux:
 
 ```bash
 java -version
-```
-
-Start the graphical application using the included Gradle wrapper:
-
-```bash
 ./gradlew run
 ```
 
-On Windows, use `gradlew.bat run` instead. A separate Gradle installation is not required. The first build needs internet access to download Gradle and project dependencies.
+In IntelliJ IDEA, open the project folder as a Gradle project and set both the **Project SDK** and **Gradle JVM** to JDK 25. The GUI entry point is `puyo.Launcher`.
 
-In IntelliJ IDEA, open the project folder, import the Gradle project, and set both the Project SDK and Gradle JVM to JDK 25. The GUI entry point is `puyo.Launcher`.
+### Tests and packaging
 
-## Commands
-
-Enter a command in the text field and press Enter or click the send button.
-
-| Command | Example | Purpose |
+| Task | Windows PowerShell | macOS / Linux |
 | --- | --- | --- |
-| `todo DESCRIPTION` | `todo read chapter 6` | Add a task without a date. |
-| `deadline DESCRIPTION /by DATE_TIME` | `deadline submit report /by 2026-09-18 2359` | Add a task with a deadline. |
-| `event DESCRIPTION /from DATE_TIME /to DATE_TIME` | `event study group /from 2026-09-17 1400 /to 2026-09-17 1600` | Add an event with a start and end time. |
-| `list` | `list` | Show all tasks. |
-| `mark NUMBER` | `mark 1` | Mark a task as completed. |
-| `unmark NUMBER` | `unmark 1` | Mark a task as incomplete. |
-| `delete NUMBER` | `delete 1` | Remove a task. |
-| `find KEYWORD` | `find report` | Find descriptions containing a keyword, ignoring letter case. |
-| `viewschedule DATE` | `viewschedule 2026-09-18` | Request the schedule for a date. |
-| `bye` | `bye` | Save tasks and exit. |
+| Run automated tests | `.\gradlew.bat test` | `./gradlew test` |
+| Run tests and Checkstyle | `.\gradlew.bat check` | `./gradlew check` |
+| Build the runnable JAR | `.\gradlew.bat clean shadowJar` | `./gradlew clean shadowJar` |
 
-Use `yyyy-MM-dd` for dates and `yyyy-MM-dd HHmm` for dates with a 24-hour time. For example, `2026-09-18 1800` means 18 September 2026 at 6 pm. A date without a time is interpreted as midnight. An event's start must be earlier than its end.
-
-Task numbers start at **1**. Use the numbers from the full `list` output when marking, unmarking, or deleting tasks; search and schedule results are numbered separately. `[X]` means incomplete and `[✓]` means completed.
-
-The current `viewschedule` implementation matches the formatted task text. Its results can include false matches and may omit dates between the start and end of a multi-day event. Use `list` to check the full task details.
-
-## Data storage
-
-Puyo stores tasks in `data/puyo.txt`, relative to the directory from which the application is launched. If the file does not exist, Puyo starts with an empty task list and attempts to create the folder and file when saving.
-
-Task additions, deletions, and changes to completion status are saved automatically. Launch Puyo from the same directory each time to use the same saved task list.
-
-## Building a runnable JAR
-
-With Java 25 selected, run:
-
-```bash
-./gradlew clean shadowJar
-```
-
-This produces `build/libs/puyo.jar`, which includes the application's dependencies. On Windows, use `gradlew.bat clean shadowJar`.
-
-Copy `puyo.jar` to a separate folder, open a terminal there, and launch it with:
-
-```bash
-java -jar puyo.jar
-```
-
-Before distributing the JAR, test it from an empty folder and on the operating systems you intend to support.
-
-## Tests and code style
-
-Run the automated tests:
-
-```bash
-./gradlew test
-```
-
-Run the tests and configured Checkstyle checks:
-
-```bash
-./gradlew check
-```
-
-On Windows, replace `./gradlew` with `gradlew.bat`.
+The build produces `build/libs/puyo.jar`, containing the application and its dependencies. Copy it to an empty folder and run `java -jar puyo.jar` there to check that it starts and saves tasks without relying on files in the repository. Test the same JAR on the other operating systems you intend to support before releasing it.
 
 ## Project structure
 
 | Location | Contents |
 | --- | --- |
-| `src/main/java/puyo/` | Application coordination, GUI launcher, window controller, and chat components. |
+| `src/main/java/puyo/` | Application coordination and JavaFX GUI classes. |
 | `src/main/java/parser/` | Command and date parsing. |
-| `src/main/java/command/` | Implementations of user commands. |
+| `src/main/java/command/` | Command implementations. |
 | `src/main/java/task/` | Task models and task-list operations. |
 | `src/main/java/storage/` | Loading and saving task data. |
 | `src/main/java/ui/` | Text input and response formatting. |
 | `src/main/resources/` | FXML layouts, CSS, and avatar images. |
 | `src/test/java/` | Automated tests. |
-| `docs/` | Product documentation. |
+| `docs/` | User Guide and product screenshot. |
 
 ## Acknowledgements
 
-### Libraries
+### Libraries and development tools
 
 - [JavaFX / OpenJFX](https://openjfx.io/) is used to build Puyo's graphical user interface.
 - [JUnit](https://junit.org/) is used for automated testing.
-
-### Development tools
-
 - [Shadow Gradle Plugin](https://gradleup.com/shadow/) is used to package Puyo and its dependencies into a runnable JAR.
 - [Checkstyle](https://checkstyle.org/) is used to check compliance with coding standards.
 
-### AI assistance
-
-ChatGPT was used by [fikoww](https://github.com/fikoww) to help explain the Puyo codebase, interpret project requirements, and draft this README, including its acknowledgements.
-
-<!-- TODO before final submission: Extend the disclosure above if AI was also used for code, tests, GUI changes, other documentation, or images. State the actual tool, who used it, and the extent of use. Cite localized code assistance near the relevant methods/classes, as required by the course. Do not claim work or review that did not take place. -->
-
 ### Images
 
-- `src/main/resources/images/puyo.png`: https://storage.googleapis.com/dskaigdjhfmhqe/apparel-with-penguin-logo.html
-- `src/main/resources/images/user.png`: https://www.magnific.com/premium-vector/black-white-boy-illustration-doodle-artwork_176795745.htm
+- Penguin avatar (`puyo.png`): [source page](https://storage.googleapis.com/dskaigdjhfmhqe/apparel-with-penguin-logo.html).
+- User avatar (`user.png`): [black-and-white boy illustration on Magnific](https://www.magnific.com/premium-vector/black-white-boy-illustration-doodle-artwork_176795745.htm).
 
-<!-- TODO before final submission: Credit reused GUI images near the first screenshot showing them in docs/README.md as well. Course-provided assets are exempt under the supplied course policy. -->
+These sources are also credited beside the GUI screenshot in the User Guide.
 
-<!-- TODO before final submission: If external code or documentation was reused, add the original source at the relevant location. For code inspired by a source or substantially adapted from it, use an appropriate source comment. Enclose non-trivial copied code with only minor changes in //@@author fikoww-reused and //@@author tags, with a source citation. Reuse from course materials does not require credit under the course policy. -->
+### AI assistance
+
+[fikoww](https://github.com/fikoww) used ChatGPT to help explain the codebase and course requirements, prepare the README and User Guide, and implement improvements to command parsing, date validation, and schedule filtering with related tests. This disclosure covers the assistance used for this finalization work.
