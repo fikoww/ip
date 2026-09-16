@@ -219,18 +219,18 @@ public class ParserTest {
     @Test
     public void parse_impossibleDeadlineOrEventDate_throwsException() {
         assertThrows(PuyoException.class, () -> Parser.parse("deadline report /by 2026-02-30"));
-        assertThrows(PuyoException.class,
-                () -> Parser.parse("event meeting /from 2026-02-30 1200 /to 2026-03-01 1200"));
-        assertThrows(PuyoException.class,
-                () -> Parser.parse("event meeting /from 2026-04-30 1200 /to 2026-04-31 1200"));
+        assertThrows(PuyoException.class, () ->
+                Parser.parse("event meeting /from 2026-02-30 1200 /to 2026-03-01 1200"));
+        assertThrows(PuyoException.class, () ->
+                Parser.parse("event meeting /from 2026-04-30 1200 /to 2026-04-31 1200"));
     }
 
     @Test
     public void parse_emptyDeadlineOrEventField_throwsException() {
         assertThrows(PuyoException.class, () -> Parser.parse("deadline /by 2026-09-18"));
         assertThrows(PuyoException.class, () -> Parser.parse("deadline report /by"));
-        assertThrows(PuyoException.class,
-                () -> Parser.parse("event /from 2026-09-18 1400 /to 2026-09-18 1600"));
+        assertThrows(PuyoException.class, () ->
+                Parser.parse("event /from 2026-09-18 1400 /to 2026-09-18 1600"));
         assertThrows(PuyoException.class, () -> Parser.parse("event meeting /from /to 2026-09-18 1600"));
         assertThrows(PuyoException.class, () -> Parser.parse("event meeting /from 2026-09-18 1400 /to"));
     }
