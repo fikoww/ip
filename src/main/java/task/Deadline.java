@@ -1,5 +1,6 @@
 package puyo.task;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import puyo.parser.Parser;
@@ -20,6 +21,18 @@ public class Deadline extends Task {
     public Deadline(String description, LocalDateTime by) {
         super(description, TaskType.DEADLINE);
         this.by = by;
+    }
+
+    /**
+     * Returns whether the deadline falls on the given date, regardless of its time.
+     * Implemented with assistance from ChatGPT.
+     *
+     * @param date The date to check.
+     * @return {@code true} if the deadline is due on this date.
+     */
+    @Override
+    public boolean isScheduledOn(LocalDate date) {
+        return by.toLocalDate().equals(date);
     }
 
     /**
