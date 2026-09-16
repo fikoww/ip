@@ -1,5 +1,6 @@
 package puyo.task;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import puyo.PuyoException;
@@ -32,6 +33,19 @@ public class Event extends Task {
 
         this.start = start;
         this.end = end;
+    }
+
+    /**
+     * Returns whether the date is between the event's start and end dates, inclusive.
+     * This date-based rule includes the end date even when the event ends at midnight.
+     * Implemented with assistance from ChatGPT.
+     *
+     * @param date The date to check.
+     * @return {@code true} for the start date, end date, and every date in between.
+     */
+    @Override
+    public boolean isScheduledOn(LocalDate date) {
+        return !date.isBefore(start.toLocalDate()) && !date.isAfter(end.toLocalDate());
     }
 
     /**
