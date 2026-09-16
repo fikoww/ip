@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.util.Locale;
 
 import puyo.PuyoException;
 import puyo.command.AddCommand;
@@ -15,26 +17,31 @@ import puyo.command.ListCommand;
 import puyo.command.MarkCommand;
 import puyo.command.UnknownCommand;
 import puyo.command.UnmarkCommand;
+import puyo.command.ViewScheduleCommand;
 import puyo.task.Deadline;
 import puyo.task.Event;
 import puyo.task.ToDo;
 
 /**
  * Parses user input strings into executable {@code Command} objects.
+ * Input validation updates were developed with ChatGPT assistance.
  */
 public class Parser {
 
     /** Formatter for input dates in YYYY-MM-DD format. */
-    public static final DateTimeFormatter INPUT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter INPUT_DATE = DateTimeFormatter.ofPattern("uuuu-MM-dd")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     /** Formatter for input date and time in YYYY-MM-DD HHmm format. */
-    public static final DateTimeFormatter INPUT_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    public static final DateTimeFormatter INPUT_DATETIME = DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm")
+            .withResolverStyle(ResolverStyle.STRICT);
 
     /** Formatter for displaying date and time in user interface. */
-    public static final DateTimeFormatter DISPLAY_DATETIME = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
+    public static final DateTimeFormatter DISPLAY_DATETIME =
+            DateTimeFormatter.ofPattern("MMM dd uuuu, h:mma", Locale.ENGLISH);
 
     /** Formatter for saving date and time into storage files. */
-    public static final DateTimeFormatter SAVE_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    public static final DateTimeFormatter SAVE_DATETIME = DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm");
 
     /**
      * Parses the raw user input into a corresponding {@code Command}.
@@ -46,14 +53,17 @@ public class Parser {
     public static Command parse(String input) throws PuyoException {
         assert input != null : "Input string to parse should not be null";
 
+        input = input.trim();
         if (input.isBlank()) {
             throw new PuyoException("Please enter a non-empty valid command!");
         }
 
-        String[] parts = input.split(" ");
+        String[] parts = input.split("\\s+", 2);
         assert parts.length > 0 : "Split string array should contain at least one element";
 
-        String firstWord = parts[0].toLowerCase();
+        String firstWord = parts[0].toLowerCase(Locale.ROOT);
+        // Normalize the command separator without changing the task description.
+        input = firstWord + (parts.length == 2 ? " " + parts[1] : "");
         switch (firstWord) {
             case "bye":
                 return new ByeCommand();
@@ -94,8 +104,11 @@ public class Parser {
         assert offset > 0 : "Offset must be positive";
 
         try {
-            int index = Integer.parseInt(input.substring(offset).trim()) - 1;
-            return type.equals("mark") ? new MarkCommand(index) : new UnmarkCommand(index);
+            int number = Integer.parseInt(input.substring(offset).trim());
+            if (number < 1) {
+                throw new PuyoException("Task numbers start at 1! (e.g. " + type + " 1)");
+            }
+            return type.equals("mark") ? new MarkCommand(number - 1) : new UnmarkCommand(number - 1);
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
             throw new PuyoException("Please provide a valid task number! (e.g. " + type + " 1)");
         }
@@ -109,11 +122,14 @@ public class Parser {
      * @throws PuyoException If the index argument is invalid or missing.
      */
     private static Command parseDeleteCommand(String input) throws PuyoException {
-        assert input.toLowerCase().startsWith("delete") : "Input should start with 'delete'";
+        assert input.startsWith("delete") : "Input should start with 'delete'";
 
         try {
-            int index = Integer.parseInt(input.substring(7).trim()) - 1;
-            return new DeleteCommand(index);
+            int number = Integer.parseInt(input.substring(7).trim());
+            if (number < 1) {
+                throw new PuyoException("Task numbers start at 1! (e.g. delete 1)");
+            }
+            return new DeleteCommand(number - 1);
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
             throw new PuyoException("Please provide a valid task number to delete! (e.g. delete 1)");
         }
@@ -127,7 +143,7 @@ public class Parser {
      * @throws PuyoException If the description is empty.
      */
     private static Command parseTodoCommand(String input) throws PuyoException {
-        assert input.toLowerCase().startsWith("todo") : "Input should start with 'todo'";
+        assert input.startsWith("todo") : "Input should start with 'todo'";
 
         String desc = input.substring(4).trim();
         if (desc.isEmpty()) {
@@ -144,14 +160,14 @@ public class Parser {
      * @throws PuyoException If the arguments or date format are invalid.
      */
     private static Command parseDeadlineCommand(String input) throws PuyoException {
-        assert input.toLowerCase().startsWith("deadline") : "Input should start with 'deadline'";
+        assert input.startsWith("deadline") : "Input should start with 'deadline'";
 
-        if (!input.toLowerCase().contains("/by")) {
+        int byIndex = findFlag(input, "/by");
+        if (byIndex == -1) {
             throw new PuyoException("Please enter a valid deadline by using '/by'!");
         }
-        String[] parts = input.substring(9).split("/by", 2);
-        String name = parts[0].trim();
-        String byRaw = parts.length > 1 ? parts[1].trim() : "";
+        String name = input.substring(8, byIndex).trim();
+        String byRaw = input.substring(byIndex + 3).trim();
         if (name.isEmpty() || byRaw.isEmpty()) {
             throw new PuyoException("The description or time of a deadline can't be empty!");
         }
@@ -170,11 +186,10 @@ public class Parser {
      * @throws PuyoException If the arguments or date formats are invalid.
      */
     private static Command parseEventCommand(String input) throws PuyoException {
-        assert input.toLowerCase().startsWith("event") : "Input should start with 'event'";
+        assert input.startsWith("event") : "Input should start with 'event'";
 
-        String lower = input.toLowerCase();
-        int fromIndex = lower.indexOf("/from");
-        int toIndex = lower.indexOf("/to");
+        int fromIndex = findFlag(input, "/from");
+        int toIndex = findFlag(input, "/to");
 
         if (fromIndex == -1 || toIndex == -1) {
             throw new PuyoException("Please enter a valid event timing by using '/from' and '/to'!");
@@ -183,26 +198,37 @@ public class Parser {
             throw new PuyoException("Please enter a valid event timing by putting '/from' before '/to'!");
         }
 
-        String[] parts = input.substring(6).split("/from|/to");
-        if (parts.length < 3) {
-            throw new PuyoException("Event description, '/from', or '/to' cannot be empty!");
-        }
-
-        String name = parts[0].trim();
-        String from = parts[1].trim();
-        String to = parts[2].trim();
+        String name = input.substring(5, fromIndex).trim();
+        String from = input.substring(fromIndex + 5, toIndex).trim();
+        String to = input.substring(toIndex + 3).trim();
 
         if (name.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new PuyoException("Event description, '/from', or '/to' cannot be empty!");
         }
 
-        LocalDateTime fromDT = parseDateTime(from);
-        LocalDateTime toDT = parseDateTime(to);
-        if (fromDT == null || toDT == null) {
+        LocalDateTime fromDateTime = parseDateTime(from);
+        LocalDateTime toDateTime = parseDateTime(to);
+        if (fromDateTime == null || toDateTime == null) {
             throw new PuyoException("Invalid date format! Use: yyyy-MM-dd or yyyy-MM-dd HHmm (e.g. 2019-12-02 1800)");
         }
 
-        return new AddCommand(new Event(name, fromDT, toDT));
+        return new AddCommand(new Event(name, fromDateTime, toDateTime));
+    }
+
+    /**
+     * Finds a flag without changing the character positions in the original input.
+     *
+     * @param input The command string to search.
+     * @param flag The flag to find, ignoring letter case.
+     * @return The flag's starting position, or {@code -1} if it is absent.
+     */
+    private static int findFlag(String input, String flag) {
+        for (int i = 0; i <= input.length() - flag.length(); i++) {
+            if (input.regionMatches(true, i, flag, 0, flag.length())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -235,7 +261,7 @@ public class Parser {
      * @throws PuyoException If the search keyword is empty.
      */
     private static Command parseFindCommand(String input) throws PuyoException {
-        assert input.toLowerCase().startsWith("find") : "Input should start with 'find'";
+        assert input.startsWith("find") : "Input should start with 'find'";
 
         String keyword = input.substring(4).trim();
         if (keyword.isEmpty()) {
@@ -252,16 +278,15 @@ public class Parser {
      * @throws PuyoException If the date format is invalid or missing.
      */
     private static Command parseViewScheduleCommand(String input) throws PuyoException {
+        String[] parts = input.split("\\s+", 2);
+        if (parts.length < 2 || parts[1].trim().isEmpty()) {
+            throw new PuyoException("Please provide a valid date! Format: viewschedule YYYY-MM-DD");
+        }
         try {
-            // Split input by whitespace into at most 2 parts: ["viewschedule", "2026-09-03"]
-            String[] parts = input.split("\\s+", 2);
-            if (parts.length < 2 || parts[1].trim().isEmpty()) {
-                throw new PuyoException("Please provide a valid date! Format: viewschedule YYYY-MM-DD");
-            }
             String dateString = parts[1].trim();
-            LocalDate date = LocalDate.parse(dateString);
-            return new puyo.command.ViewScheduleCommand(date);
-        } catch (Exception e) {
+            LocalDate date = LocalDate.parse(dateString, INPUT_DATE);
+            return new ViewScheduleCommand(date);
+        } catch (DateTimeParseException e) {
             throw new PuyoException("Please provide a valid date! Format: viewschedule YYYY-MM-DD");
         }
     }

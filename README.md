@@ -130,8 +130,8 @@ ChatGPT was used by [fikoww](https://github.com/fikoww) to help explain the Puyo
 
 ### Images
 
-- `src/main/resources/images/puyo.png`: **TODO: identify the creator and original source URL, or state that it was self-created or AI-generated with the actual tool used.**
-- `src/main/resources/images/user.png`: **TODO: identify the creator and original source URL, or state that it was self-created or AI-generated with the actual tool used.**
+- `src/main/resources/images/puyo.png`: https://storage.googleapis.com/dskaigdjhfmhqe/apparel-with-penguin-logo.html
+- `src/main/resources/images/user.png`: https://www.magnific.com/premium-vector/black-white-boy-illustration-doodle-artwork_176795745.htm
 
 <!-- TODO before final submission: Credit reused GUI images near the first screenshot showing them in docs/README.md as well. Course-provided assets are exempt under the supplied course policy. -->
 
