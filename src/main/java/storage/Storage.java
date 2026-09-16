@@ -144,7 +144,8 @@ public class Storage {
                 try {
                     return new Event(name, start, end);
                 } catch (PuyoException e) {
-                    System.out.println(" [Warning] Skipping invalid event time at line " + lineNum + ": " + e.getMessage());
+                    System.out.println(" [Warning] Skipping invalid event time at line " + lineNum + ": "
+                            + e.getMessage());
                     return null;
                 }
             default:
